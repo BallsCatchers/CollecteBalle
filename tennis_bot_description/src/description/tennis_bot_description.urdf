@@ -17,7 +17,7 @@
   <xacro:property name="arm_height" value="0.02"/>
   <xacro:property name="arm_ygap" value="-0.01"/>
   <xacro:property name="arm_zoff" value="0.02"/>
-  <xacro:property name="arm_xoff" value="-0.36"/>
+  <xacro:property name="arm_xoff" value="-0.21"/>
 
   <!-- Define intertial property macros  -->
   <xacro:macro name="box_inertia" params="m w h d">
@@ -100,7 +100,7 @@
       <parent link="base_link"/>
       <child link="${prefix}_link"/>
       <origin xyz="${x_reflect*wheel_xoff} ${y_reflect*(base_width/2+wheel_ygap)} ${-wheel_zoff}" rpy="0 0 0"/>
-      <axis xyz="1 0 0"/>
+      <axis xyz="0 1 0"/>
     </joint>
   </xacro:macro>
 
@@ -110,10 +110,10 @@
   <xacro:wheel prefix="drivewhl_f_r" x_reflect="1" y_reflect="-1" />
   
   <!--Robot arms -->
-  <xacro:macro name="arm" params="prefix x_reflect y_reflect">
+  <xacro:macro name="arm" params="prefix x_reflect y_reflect orientation">
     <link name="${prefix}_link">
       <visual>
-        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <origin xyz="0.15 0 0" rpy="${pi/2} 0 0"/>
         <geometry>
           <box size="${arm_length} ${arm_width} ${arm_height}"/>
         </geometry>
@@ -135,12 +135,12 @@
     <joint name="${prefix}_joint" type="continuous">
       <parent link="base_link"/>
       <child link="${prefix}_link"/>
-      <origin xyz="${x_reflect*arm_xoff} ${y_reflect*(base_width/2+arm_ygap)} ${-arm_zoff}" rpy="0 0 0"/>
-      <axis xyz="0 1 0"/>
+      <origin xyz="${x_reflect*arm_xoff} ${y_reflect*(base_width/2+arm_ygap)} ${-arm_zoff}" rpy="0 0 ${orientation}"/>
+      <axis xyz="0 0 1"/>
     </joint>
   </xacro:macro>
   
-  <xacro:arm prefix="arm_l" x_reflect="-1" y_reflect="1" />
-  <xacro:arm prefix="arm_r" x_reflect="-1" y_reflect="-1" />
+  <xacro:arm prefix="arm_l" x_reflect="-1" y_reflect="1" orientation="1"/>
+  <xacro:arm prefix="arm_r" x_reflect="-1" y_reflect="-1" orientation="-1"/>
   
 </robot>
