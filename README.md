@@ -7,7 +7,7 @@ Ceci est un template de dépôt Git pour le cours d'ingénierie système et mod�
 
 ### Dépendences
 
-- Import sam_robot model :
+- Import sam_bot model :
 
 ```bash
 cd ~/ros2_ws/src
