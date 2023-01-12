@@ -13,7 +13,7 @@
   <xacro:property name="wheel_xoff" value="0.12"/>
   
   <xacro:property name="arm_width" value="0.20"/>
-  <xacro:property name="arm_length" value="0.30"/>
+  <xacro:property name="arm_length" value="0.20"/>
   <xacro:property name="arm_height" value="0.02"/>
   <xacro:property name="arm_ygap" value="-0.01"/>
   <xacro:property name="arm_zoff" value="0.02"/>
@@ -113,7 +113,7 @@
   <xacro:macro name="arm" params="prefix x_reflect y_reflect orientation">
     <link name="${prefix}_link">
       <visual>
-        <origin xyz="0.15 0 0" rpy="${pi/2} 0 0"/>
+        <origin xyz="0.10 0 0" rpy="${pi/2} 0 0"/>
         <geometry>
           <box size="${arm_length} ${arm_width} ${arm_height}"/>
         </geometry>
