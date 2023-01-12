@@ -1,5 +1,7 @@
 # Launch the robot only
 
-```colcon build
+```
+colcon build
 . install/setup.bash
-ros2 launch tennis_bot_description display.launch.py```
+ros2 launch tennis_bot_description display.launch.py
+```
