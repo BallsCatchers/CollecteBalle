@@ -18,11 +18,24 @@ cd ../..
 colcon build
 ```
 
+### Launch the robot only
 
-### Démarrer la simulation
+```
+colcon build
+. install/setup.bash
+ros2 launch tennis_bot_description display.launch.py
+```
+
+### Launch a prototype on the field
+
+```
+ros2 launch tennis_bot_description spawner_sam.launch.py 
+```
+
+### Launch the robot on the field
 
 ###### A compléter avec la/les commande(s) à lancer.
-```bash
+```
 # TODO
 ```
 
@@ -67,19 +80,3 @@ Le dossier `docs` contient tous les documents utiles au projet:
 ### Rapports
 
 Le dossier `reports` doit être rempli avec les rapports d'[objectifs](../reports/GoalsTemplate.md) et de [rétrospectives](../reports/DebriefTemplate.md) en suivant les deux templates mis à disposition. Ces deux rapports doivent être rédigés respectivement au début et à la fin de chaque sprint.
-
-### Package `tennis_bot_description`
-
-Le dossier `tennis_bot_description` est un package ROS permettant de 
-
-Lancer le terrain avec le model sam_bot :
-
-```bash
-ros2 launch tennis_bot_description spawner_sam.launch.py 
-```
-
-Lancer le terrain avec le model tennis_bot :
-
-```bash
-ros2 launch tennis_bot_description spawner.launch.py 
-```
