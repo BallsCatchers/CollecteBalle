@@ -29,12 +29,16 @@ ros2 launch tennis_bot_description display.launch.py
 ### Launch a prototype on the field
 
 ```
+colcon build
+. install/setup.bash
 ros2 launch tennis_bot_description spawner_sam.launch.py 
 ```
 
 ### Launch the BallsCatcher robot on the field
 
 ```
+colcon build
+. install/setup.bash
 ros2 launch tennis_bot_description spawner.launch.py
 ```
 
