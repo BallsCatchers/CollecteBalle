@@ -41,7 +41,7 @@ Simon GERVAISE
 
 ### Gestion de projet
 
-[Taiga](https://tree.taiga.io/project/thomastacheron-collecteballe/timeline).
+[Taiga](https://tree.taiga.io/project/thomastacheron-collecteballe/timeline)
 
 
 
