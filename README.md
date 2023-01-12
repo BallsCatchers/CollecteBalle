@@ -7,7 +7,7 @@ Ceci est un template de dépôt Git pour le cours d'ingénierie système et mod�
 
 ### Dépendences
 
-- Import sam robot model :
+- Import sam_robot model :
 
 ```bash
 cd ~/ros2_ws/src
@@ -39,7 +39,7 @@ Simon GERVAISE
 
 ### Gestion de projet
 
-###### A compléter avec le lien vers votre [Taiga](https://tree.taiga.io/project/thomastacheron-collecteballe/timeline).
+[Taiga](https://tree.taiga.io/project/thomastacheron-collecteballe/timeline).
 
 
 
