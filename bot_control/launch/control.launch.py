@@ -5,7 +5,7 @@ from launch_ros.actions import Node
 def generate_launch_description(namespace="BallCatcher"):
     ld = LaunchDescription()
     controlNode = Node(
-        package="BallCatcher_brain",
+        package="bot_control",
         namespace=namespace,
         executable="brain.py",
         output="screen",
