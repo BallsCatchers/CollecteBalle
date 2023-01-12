@@ -7,13 +7,15 @@ Ceci est un template de dépôt Git pour le cours d'ingénierie système et mod�
 
 ### Dépendences
 
-- Import sam robot model :
+- Import sam_bot model :
 
 ```bash
 cd ~/ros2_ws/src
 git clone https://github.com/ros-planning/navigation2_tutorials.git
 cd navigation2_tutorials/
 rm -r nav2_*
+cd ../..
+colcon build
 ```
 
 
@@ -39,7 +41,7 @@ Simon GERVAISE
 
 ### Gestion de projet
 
-###### A compléter avec le lien vers votre [Taiga](https://tree.taiga.io/project/thomastacheron-collecteballe/timeline).
+[Taiga](https://tree.taiga.io/project/thomastacheron-collecteballe/timeline)
 
 
 
@@ -66,10 +68,12 @@ Le dossier `docs` contient tous les documents utiles au projet:
 
 Le dossier `reports` doit être rempli avec les rapports d'[objectifs](../reports/GoalsTemplate.md) et de [rétrospectives](../reports/DebriefTemplate.md) en suivant les deux templates mis à disposition. Ces deux rapports doivent être rédigés respectivement au début et à la fin de chaque sprint.
 
-### Package `bot_spawn`
+### Package `tennis_bot_description`
 
-Le dossier `bot_spawn` est un package ROS permettant de lancer un model de robot sur le terrain.
+Le dossier `tennis_bot_description` est un package ROS permettant de 
+
+Lancer le terrain avec le model sam_bot :
 
 ```bash
-ros2 launch bot_spawn spawner.launch.py 
+ros2 launch tennis_bot_description spawner_sam.launch.py 
 ```
