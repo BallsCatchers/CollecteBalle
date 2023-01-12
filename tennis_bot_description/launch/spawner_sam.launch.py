@@ -35,7 +35,7 @@ def generate_launch_description():
     # rqt robot steering = 
 
     return launch.LaunchDescription([
-        launch.actions.IncludeLaunchDescription(
+        launch.actions.IncludeLaunchDescription( # lance le gazebo
             launch.launch_description_sources.PythonLaunchDescriptionSource(
                 court_path)
         ),

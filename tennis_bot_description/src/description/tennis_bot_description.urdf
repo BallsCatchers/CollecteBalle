@@ -59,9 +59,9 @@
         <box size="${base_length} ${base_width} ${base_height}"/>
       </geometry>
     </collision>
-  </link>
 
     <xacro:box_inertia m="15" w="${base_width}" d="${base_length}" h="${base_height}"/>
+  </link>
 
   <!-- Robot Footprint -->
   <link name="base_footprint"/>

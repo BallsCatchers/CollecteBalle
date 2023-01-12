@@ -77,3 +77,9 @@ Lancer le terrain avec le model sam_bot :
 ```bash
 ros2 launch tennis_bot_description spawner_sam.launch.py 
 ```
+
+Lancer le terrain avec le model tennis_bot :
+
+```bash
+ros2 launch tennis_bot_description spawner.launch.py 
+```
