@@ -11,26 +11,28 @@ def generate_launch_description():
     default_model_path = os.path.join(pkg_share, 'src/description/sam_bot_description.urdf')
     rviz_path = os.path.join(pkg_share, 'rviz/gazebo.rviz.')
 
-    robot_state_publisher_node = launch_ros.actions.Node(
+    robot_state_publisher_node = launch_ros.actions.Node( # robot model
         package='robot_state_publisher',
         executable='robot_state_publisher',
         parameters=[{'robot_description': Command(['xacro ', LaunchConfiguration('model')])}]
     )
 
-    spawn_entity = launch_ros.actions.Node(
+    spawn_entity = launch_ros.actions.Node( # fait spawn le robot
     	package='gazebo_ros', 
     	executable='spawn_entity.py',
-        arguments=['-entity', 'sam_bot', '-topic', 'robot_description'],
+        arguments=['-entity', 'sam_bot', '-topic', 'robot_description'], # nom du robot
         output='screen'
     )
 
-    rviz_node = launch_ros.actions.Node(
+    rviz_node = launch_ros.actions.Node( # Rviz
         package='rviz2',
         executable='rviz2',
         name='rviz2',
         output='screen',
         arguments=['-d', str(rviz_path)]
     )
+
+    # rqt robot steering = 
 
     return launch.LaunchDescription([
         launch.actions.IncludeLaunchDescription(

@@ -14,6 +14,8 @@ cd ~/ros2_ws/src
 git clone https://github.com/ros-planning/navigation2_tutorials.git
 cd navigation2_tutorials/
 rm -r nav2_*
+cd ../..
+colcon build
 ```
 
 
