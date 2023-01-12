@@ -32,9 +32,8 @@ ros2 launch tennis_bot_description display.launch.py
 ros2 launch tennis_bot_description spawner_sam.launch.py 
 ```
 
-### Launch the robot on the field
+### Launch the BallsCatcher robot on the field
 
-###### A compléter avec la/les commande(s) à lancer.
 ```
 ros2 launch tennis_bot_description spawner.launch.py
 ```
