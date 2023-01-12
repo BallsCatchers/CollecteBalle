@@ -36,7 +36,7 @@ ros2 launch tennis_bot_description spawner_sam.launch.py
 
 ###### A compléter avec la/les commande(s) à lancer.
 ```
-# TODO
+ros2 launch tennis_bot_description spawner.launch.py
 ```
 
 
