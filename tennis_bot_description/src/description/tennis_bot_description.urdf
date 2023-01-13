@@ -168,7 +168,6 @@
   <xacro:arm prefix="arm_l" x_reflect="-1" y_reflect="1" orientation="1"/>
   <xacro:arm prefix="arm_r" x_reflect="-1" y_reflect="-1" orientation="-1"/>
   
-<<<<<<< HEAD
   <xacro:macro name="cylinders" params ="prefix radius length parent y_orientation z_orientation x_pos y_pos z_pos">
     <link name="${prefix}_link">
       <visual>
