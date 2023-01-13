@@ -17,7 +17,7 @@ def detect_yellow_balls(image):
     # Define the range of yellow color in HSV
     lower_yellow = np.array([22, 93, 0])
     upper_yellow = np.array([55, 255, 255])
-    r = 1
+    r = 5
     # Create a mask for the yellow pixels
     mask = cv2.inRange(im_hsv, lower_yellow, upper_yellow)
 
@@ -69,6 +69,7 @@ def detect_base(img_RGB):
     else:
         return False, None
 
+<<<<<<< HEAD
 def detect_marker(img_RGB):
     # Define the range of colors for red and green markers
     lower_red = np.array([0, 0, 200])
@@ -84,6 +85,29 @@ def detect_marker(img_RGB):
     green_mask = cv2.inRange(img_HSV, lower_green, upper_green)
 
     # Get the contours of the markers
+    
+import math
+
+def detect_marker(img_RGB):
+    r = 5
+    im_hsv = cv2.cvtColor(img_RGB, cv2.COLOR_BGR2HSV)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (r ,r))
+
+    # Define the range of colors for red and green markers
+    # Create a mask for the red and green pixels
+    lower_red = np.array([0, 0, 200])
+    upper_red = np.array([50, 50, 255])
+    red_mask = cv2.inRange(im_hsv, lower_red, upper_red)
+
+    lower_green = np.array([30, 100, 30])
+    upper_green = np.array([90, 255, 90])
+    green_mask = cv2.inRange(im_hsv, lower_green, upper_green)
+
+    # Apply morphological operations to remove noise
+    red_mask = cv2.morphologyEx(red_mask, cv2.MORPH_OPEN, kernel)
+    green_mask = cv2.morphologyEx(green_mask, cv2.MORPH_OPEN, kernel)
+
+    # Get contours in mask image
     red_contours, _ = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     green_contours, _ = cv2.findContours(green_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -104,6 +128,10 @@ def detect_marker(img_RGB):
 
     # If both markers are found, calculate the orientation of the robot
     if red_x is not None and green_x is not None and red_y is not None and green_y is not None:
+<<<<<<< HEAD
+=======
+        print(red_x, red_y, green_x, green_y)
+>>>>>>> devel
         position_x = (green_x + red_x)/2
         position_y = (green_y + red_y)/2
         orientation = math.atan2(green_y - red_y, green_x - red_x)
@@ -111,6 +139,10 @@ def detect_marker(img_RGB):
 
     return False, None, None, None
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> devel
 class Camera(Node):
 
     def __init__(self):
@@ -132,7 +164,7 @@ class Camera(Node):
             ball_positions = []
             if balls_detected:
                 for x, y, radius, area in balls:
-                    self.get_logger().info(f"Yellow balls detected at: (x,y) = ({x},{y}) with r = {radius}")
+                    # self.get_logger().info(f"Yellow balls detected at: (x,y) = ({x},{y}) with r = {radius}")
 
                     # cv2.circle(self.image, (int(x), int(y)), int(radius), (0, 0, 255), -1)
                     # cv2.rectangle(self.image, (int(x) - 5, int(y) - 5), (int(x) + 5, int(y) + 5), (0, 128, 255), -1)
@@ -145,7 +177,7 @@ class Camera(Node):
             base_positions = []
             if base_detected:
                 for x, y, w, h in base:
-                    self.get_logger().info(f"\nBase detected at: (x,y) = ({x},{y}) with size (w,h) = ({w},{h})\n")
+                    # self.get_logger().info(f"\nBase detected at: (x,y) = ({x},{y}) with size (w,h) = ({w},{h})\n")
 
                     # cv2.rectangle(self.image,(int(x),int(y)),(int(x)+int(w),int(y)+int(h)),(255,0,0),2)
 
@@ -157,10 +189,20 @@ class Camera(Node):
             marker_detected, position_x, position_y, orientation = detect_marker(self.image)
             robot_position = []
             if marker_detected:
+<<<<<<< HEAD
+=======
+                self.get_logger().info(f"\Robot detected at: (x,y, theta) = ({position_x},{position_y},{orientation}")
+>>>>>>> devel
                 self.get_logger().info(f"\nOrientation : {position_x}\n")
                 self.get_logger().info(f"\nOrientation : {position_y}\n")
                 self.get_logger().info(f"\nOrientation : {orientation}\n")
                 robot_position = [position_x, position_y, orientation]
+<<<<<<< HEAD
+=======
+                cv2.rectangle(self.image,(int(position_x),int(position_y)),(5,5),(255,0,0),2)
+                cv2.rectangle(self.image,(int(position_x + math.cos(orientation)*10),\
+                              int(position_y + math.sin(orientation)*10)),(5,5),(255,0,0),2)
+>>>>>>> devel
 
             self.image_publisher(ball_positions, base_positions, robot_position)
 
