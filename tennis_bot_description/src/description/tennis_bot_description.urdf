@@ -167,8 +167,25 @@
   
   <xacro:arm prefix="arm_l" x_reflect="-1" y_reflect="1" orientation="1"/>
   <xacro:arm prefix="arm_r" x_reflect="-1" y_reflect="-1" orientation="-1"/>
+
+  <xacro:macro name="cylinders" params ="prefix radius length parent orientation x_pos y_pos z_pos">
+    <link name="${prefix}_link">
+      <visual>
+        <geometry>
+          <cylinder radius="${radius}" length="${length}"/>
+        </geometry>
+        <material name="White">
+          <color rgba="255 255 255 1"/>
+        </material>
+      </visual>
+      
+      <collision>
+        <geometry>
+          <cylinder radius="${radius}" length="${length}"/>
+        </geometry>
+      </collision>
+    </link>
   
-<<<<<<< HEAD
   <xacro:macro name="cylinders" params ="prefix radius length parent y_orientation z_orientation x_pos y_pos z_pos">
     <link name="${prefix}_link">
       <visual>
@@ -207,8 +224,8 @@
       <topicName>cmd_vel</topicName>
       <legacyMode>true</legacyMode>
       <robotNamespace>/</robotNamespace>
-      <leftJoint>drivewhl_f_l</leftJoint>
-      <rightJoint>drivewhl_f_r</rightJoint>
+      <leftJoint>drivewhl_f_l_joint</leftJoint>
+      <rightJoint>drivewhl_f_r_joint</rightJoint>
       <wheelSeparation>0.2</wheelSeparation>
       <wheelDiameter>0.2</wheelDiameter>
     </plugin>
@@ -216,8 +233,8 @@
       <topicName>cmd_vel</topicName>
       <legacyMode>true</legacyMode>
       <robotNamespace>/</robotNamespace>
-      <leftJoint>drivewhl_b_l</leftJoint>
-      <rightJoint>drivewhl_b_r</rightJoint>
+      <leftJoint>drivewhl_b_l_joint</leftJoint>
+      <rightJoint>drivewhl_b_r_joint</rightJoint>
       <wheelSeparation>0.2</wheelSeparation>
       <wheelDiameter>0.2</wheelDiameter>
     </plugin>
