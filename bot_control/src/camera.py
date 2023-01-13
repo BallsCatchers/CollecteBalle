@@ -3,6 +3,7 @@ import rclpy
 from rclpy.node import Node
 
 from sensor_msgs.msg import Image
+from std_msgs.msg import Float64MultiArray
 import numpy as np
 
 import cv2
@@ -34,11 +35,37 @@ def detect_yellow_balls(image):
         ((x, y), radius) = cv2.minEnclosingCircle(c)
         area = cv2.contourArea(c)
         # Append the circle's information to the list
-        x, y, radius = int(x), int(y), int(radius)
         balls.append((x, y, radius, area))
 
     if balls:
         return True, balls
+    else:
+        return False, None
+
+
+def detect_base(img_RGB):
+    ## Params
+    lower_orange = np.array([5, 50, 50])
+    upper_orange = np.array([15, 255, 255])
+
+    ## detection
+    #rgb to hsv
+    im_hsv = cv2.cvtColor(img_RGB, cv2.COLOR_BGR2HSV)
+    #mask with lower/upper values
+    mask = cv2.inRange(im_hsv, lower_orange, upper_orange)
+
+    ## Orange base detection (1/2)
+    # get contours in mask image
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    base = []
+    for c in contours:
+        x,y,w,h = cv2.boundingRect(c)
+        # Append the rectangle's information to the list
+        base.append((x, y, w, h))
+
+    if base:
+        return True, base
     else:
         return False, None
 
@@ -47,6 +74,9 @@ class Camera(Node):
     def __init__(self):
         super().__init__('camera')
         self.subscription_image = self.create_subscription(Image, "/zenith_camera/image_raw", self.image_callback, 10)
+        self.publisher_balls = self.create_publisher(Float64MultiArray, '/tennis_balls', 10)
+        self.publisher_base = self.create_publisher(Float64MultiArray, '/bases', 10)
+
         #Image
         self.image = []
         self.get_logger().info(self.get_name() + " is launched")
@@ -55,62 +85,53 @@ class Camera(Node):
         # self.get_logger().info('here')
         try:
             self.image = bridge.imgmsg_to_cv2(msg, "bgr8")
-            # self.image = cv2.imread('/home/am/Desktop/yellow_ball.jpg')
-            detected, balls = detect_yellow_balls(self.image)
-            if detected:
+            balls_detected, balls = detect_yellow_balls(self.image)
+            if balls_detected:
+                ball_positions = []
                 for x, y, radius, area in balls:
                     self.get_logger().info(f"Yellow balls detected at: (x,y) = ({x},{y}) with r = {radius}")
-                    cv2.circle(self.image, (x, y), radius, (0, 0, 255), -1)
-                    cv2.rectangle(self.image, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1)
 
-                cv2.imshow("Image window", self.image)
-                cv2.waitKey(1)  # it will prevent the window from freezing
+                    cv2.circle(self.image, (int(x), int(y)), int(radius), (0, 0, 255), -1)
+                    cv2.rectangle(self.image, (int(x) - 5, int(y) - 5), (int(x) + 5, int(y) + 5), (0, 128, 255), -1)
+
+                     # Add the x and y coordinates of each ball to the ball_positions list
+                    ball_positions.append(x)
+                    ball_positions.append(y)
+
+            base_detected, base = detect_base(self.image)
+            if base_detected:
+                base_positions = []
+                for x, y, w, h in base:
+                    self.get_logger().info(f"\nBase detected at: (x,y) = ({x},{y}) with size (w,h) = ({w},{h})\n")
+
+                    cv2.rectangle(self.image,(int(x),int(y)),(int(x)+int(w),int(y)+int(h)),(255,0,0),2)
+
+                     # Add the x and y coordinates of each ball to the ball_positions list
+                    base_positions.append(x)
+                    base_positions.append(y)
+
+                self.image_publisher(ball_positions, base_positions)
+
+            cv2.imshow("Image window", self.image)
+            cv2.waitKey(1)  # it will prevent the window from freezing
+
         except CvBridgeError as e:
             self.get_logger().error(self.get_name() + ": Cannot convert message " + str(e))
 
-    # def detect_yellow_balls(self):
-    #         ## Params
-    #         lower_yellow = np.array([22, 93, 0])
-    #         upper_yellow = np.array([55, 255, 255])
-    #         r = 1
-    #
-    #         ## detection
-    #         #rgb to hsv
-    #         im_hsv = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
-    #         #mask with lower/upper values
-    #         mask = cv2.inRange(im_hsv, lower_yellow, upper_yellow)
-    #
-    #         ## Yellow ball detection (1/2)
-    #         # create a disk mask
-    #         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (r ,r))
-    #         # apply an opening to the mask
-    #         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    #         # get contours in mask image
-    #         contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    #
-    #         ## localization
-    #         if len(contours):
-    #             # get area values
-    #             areas = [cv2.contourArea(c) for c in contours]
-    #             # get maximum area
-    #             c = max(contours, key=cv2.contourArea)
-    #             # get coordinates and radius of largest area
-    #             ((_, _), radius) = cv2.minEnclosingCircle(c)
-    #             M = cv2.moments(c)
-    #             x = int(M["m10"] / M["m00"])
-    #             y = int(M["m01"] / M["m00"])
-    #
-    #             cv2.circle(self.image, (int(x), int(y)), int(radius), (0, 0, 255), -1)
-    #
-    #             return True, x, y, radius
-    #
-    #         return False, None, None, None
+    def image_publisher(self, ball_positions, base_positions):
+        if ball_positions != []:
+            # Create the Float64MultiArray message for the balls
+            msg_balls = Float64MultiArray()
+            msg_balls.data = ball_positions
+            # Publish the message
+            self.publisher_balls.publish(msg_balls)
 
-
-
-
-
-
+        elif base_positions != []:
+            # Create the Float64MultiArray message for the balls
+            msg_base = Float64MultiArray()
+            msg_base.data = ball_positions
+            # Publish the message
+            self.publisher_base.publish(msg_base)
 
 def main(args=None):
     rclpy.init(args=args)
