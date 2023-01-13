@@ -38,11 +38,11 @@ class Main(Node):
         self.__trigger.data = False
 
 
-        self.twist_pub = self.create_publisher(Twist, "cmd_twist", 10)
+        self.twist_pub = self.create_publisher(Twist, "/cmd_vel", 10)
         self.__cmd_twist = Twist()
 
 
-        self.state_pub = self.create_publisher(String, "state", 10)
+        self.state_pub = self.create_publisher(String, "/state", 10)
         # ===============================
         # Main
         # ===============================
