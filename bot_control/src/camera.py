@@ -62,44 +62,29 @@ def detect_base(img_RGB):
     for c in contours:
         x,y,w,h = cv2.boundingRect(c)
         # Append the rectangle's information to the list
-        base.append((x, y, w, h))
+        if w > 10: # Avoid unwanted detection
+            base.append((x, y, w, h))
 
     if base:
         return True, base
     else:
         return False, None
-
-def detect_marker(img_RGB):
-    # Define the range of colors for red and green markers
-    lower_red = np.array([0, 0, 200])
-    upper_red = np.array([50, 50, 255])
-    lower_green = np.array([30, 100, 30])
-    upper_green = np.array([90, 255, 90])
-
-    # Convert image from BGR to HSV color space
-    img_HSV = cv2.cvtColor(img_RGB, cv2.COLOR_BGR2HSV)
-
-    # Create masks for red and green markers
-    red_mask = cv2.inRange(img_HSV, lower_red, upper_red)
-    green_mask = cv2.inRange(img_HSV, lower_green, upper_green)
-
-    # Get the contours of the markers
     
 import math
 
 def detect_marker(img_RGB):
     r = 5
     im_hsv = cv2.cvtColor(img_RGB, cv2.COLOR_BGR2HSV)
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (r ,r))
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (r, r))
 
     # Define the range of colors for red and green markers
     # Create a mask for the red and green pixels
-    lower_red = np.array([0, 0, 200])
-    upper_red = np.array([50, 50, 255])
+    lower_red = np.array([0, 215, 120])
+    upper_red = np.array([25, 255, 150])
     red_mask = cv2.inRange(im_hsv, lower_red, upper_red)
 
-    lower_green = np.array([30, 100, 30])
-    upper_green = np.array([90, 255, 90])
+    lower_green = np.array([50, 190, 120])
+    upper_green = np.array([90, 255, 160])
     green_mask = cv2.inRange(im_hsv, lower_green, upper_green)
 
     # Apply morphological operations to remove noise
@@ -131,6 +116,7 @@ def detect_marker(img_RGB):
         position_x = (green_x + red_x)/2
         position_y = (green_y + red_y)/2
         orientation = math.atan2(green_y - red_y, green_x - red_x)
+        orientation = (orientation - math.pi) % (2 * math.pi)
         return True, position_x, position_y, orientation
 
     return False, None, None, None
@@ -158,8 +144,8 @@ class Camera(Node):
                 for x, y, radius, area in balls:
                     # self.get_logger().info(f"Yellow balls detected at: (x,y) = ({x},{y}) with r = {radius}")
 
-                    # cv2.circle(self.image, (int(x), int(y)), int(radius), (0, 0, 255), -1)
-                    # cv2.rectangle(self.image, (int(x) - 5, int(y) - 5), (int(x) + 5, int(y) + 5), (0, 128, 255), -1)
+                    cv2.circle(self.image, (int(x), int(y)), int(radius), (0, 0, 255), -1)
+                    cv2.rectangle(self.image, (int(x) - 5, int(y) - 5), (int(x) + 5, int(y) + 5), (0, 128, 255), -1)
 
                      # Add the x and y coordinates of each ball to the ball_positions list
                     ball_positions.append(x)
@@ -171,24 +157,22 @@ class Camera(Node):
                 for x, y, w, h in base:
                     # self.get_logger().info(f"\nBase detected at: (x,y) = ({x},{y}) with size (w,h) = ({w},{h})\n")
 
-                    # cv2.rectangle(self.image,(int(x),int(y)),(int(x)+int(w),int(y)+int(h)),(255,0,0),2)
+                    cv2.rectangle(self.image,(int(x),int(y)),(int(x)+int(w),int(y)+int(h)),(255,0,0),2)
 
                      # Add the x and y coordinates of each ball to the ball_positions list
-                    base_positions.append(x)
-                    base_positions.append(y)
+                    base_positions.append(x * 1.0)
+                    base_positions.append(y * 1.0)
 
 
             marker_detected, position_x, position_y, orientation = detect_marker(self.image)
             robot_position = []
             if marker_detected:
                 self.get_logger().info(f"\Robot detected at: (x,y, theta) = ({position_x},{position_y},{orientation}")
-                self.get_logger().info(f"\nOrientation : {position_x}\n")
-                self.get_logger().info(f"\nOrientation : {position_y}\n")
-                self.get_logger().info(f"\nOrientation : {orientation}\n")
+                self.get_logger().info(f"\nx : {position_x}\n")
+                self.get_logger().info(f"\ny : {position_y}\n")
+                self.get_logger().info(f"\nOrientation : {orientation*180./math.pi}\n")
                 robot_position = [position_x, position_y, orientation]
-                cv2.rectangle(self.image,(int(position_x),int(position_y)),(5,5),(255,0,0),2)
-                cv2.rectangle(self.image,(int(position_x + math.cos(orientation)*10),\
-                              int(position_y + math.sin(orientation)*10)),(5,5),(255,0,0),2)
+                cv2.rectangle(self.image,(int(position_x)-2,int(position_y)-2),(int(position_x)+2,int(position_y)+2),(255,0,0),2)
             self.image_publisher(ball_positions, base_positions, robot_position)
 
             cv2.imshow("Image window", self.image)
@@ -206,9 +190,9 @@ class Camera(Node):
             self.publisher_balls.publish(msg_balls)
 
         if base_positions != []:
-            # Create the Float64MultiArray message for the balls
+            # Create the Float64MultiArray message for the base
             msg_base = Float64MultiArray()
-            msg_base.data = ball_positions
+            msg_base.data = base_positions
             # Publish the message
             self.publisher_base.publish(msg_base)
 
@@ -217,7 +201,7 @@ class Camera(Node):
             msg_orientation.x = robot_position[0]
             msg_orientation.y = robot_position[1]
             msg_orientation.z = robot_position[2]
-            self.publisher_base.publish(msg_orientation)
+            self.publisher_robot.publish(msg_orientation)
 
 def main(args=None):
     rclpy.init(args=args)
