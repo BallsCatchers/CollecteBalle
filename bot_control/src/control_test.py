@@ -1,22 +1,34 @@
+#!/usr/bin/env python3
+
 import rclpy
+import time
+from rclpy.node import Node
+
 from geometry_msgs.msg import Twist
 
-def publisher_node():
+
+class Main(Node):
+    def __init__(self):
+        super().__init__("MainBallCatcher")
+
+        self.twist_pub = self.create_publisher(Twist, "cmd_twist", 10)
+        self.__cmd_twist = Twist()
+
+        timer_period = 0.1
+        self.timer = self.create_timer(timer_period, self.process)
+        self.get_logger().info(self.get_name() + " is launched")
+
+    def process(self):
+        self.twist_pub.publish(self.__cmd_twist)
+
+
+def main(args=None):    
     rclpy.init()
-    node = rclpy.create_node('twist_publisher')
-    pub = node.create_publisher(Twist, 'cmd_vel')
-
-    msg = Twist()
-    msg.linear.x = 1.0
-    msg.angular.z = 0.5
-
-    rate = rclpy.Rate(10) # 10Hz
-    while rclpy.ok():
-        pub.publish(msg)
-        rate.sleep()
-
-    node.destroy_node()
+    my_py_node = Main()
+    rclpy.spin(my_py_node)
+    myPyNode.destroy_node()
     rclpy.shutdown()
 
+
 if __name__ == '__main__':
-    publisher_node()
+    main()
