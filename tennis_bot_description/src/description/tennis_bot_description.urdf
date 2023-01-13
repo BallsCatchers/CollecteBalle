@@ -50,7 +50,7 @@
         <box size="${base_length} ${base_width} ${base_height}"/>
       </geometry>
       <material name="White">
-        <color rgba="255 255 255 1"/>
+        <color rgba="0.9 0.9 0.9 1"/>
       </material>
     </visual>
     
@@ -69,30 +69,7 @@
         <box size="0.38 0.27 0.02"/>
       </geometry>
       <material name="White">
-        <color rgba="255 255 255 1"/>
-      </material>
-    </visual>
-
-    <collision>
-      <geometry>
-        <box size="0.38 0.27 0.02"/>
-      </geometry>
-    </collision>
-  </link>
-
-  <joint name="base_top_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="base_top_link"/>
-    <origin xyz="0.0 0.0 0.08" rpy="0 0 0"/>
-  </joint>
-
-  <link name="base_top_link">
-    <visual>
-      <geometry>
-        <box size="0.38 0.27 0.02"/>
-      </geometry>
-      <material name="White">
-        <color rgba="255 255 255 1"/>
+        <color rgba="0.9 0.9 0.9 1"/>
       </material>
     </visual>
 
@@ -127,7 +104,7 @@
             <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
         </geometry>
         <material name="White">
-          <color rgba="255 255 255 1"/>
+          <color rgba="0.9 0.9 0.9 1"/>
         </material>
       </visual>
 
@@ -164,7 +141,7 @@
           <box size="${arm_length} ${arm_width} ${arm_height}"/>
         </geometry>
         <material name="White">
-          <color rgba="255 255 255 1"/>
+          <color rgba="0.9 0.9 0.9 1"/>
         </material>
       </visual>
       
@@ -189,14 +166,14 @@
   <xacro:arm prefix="arm_l" x_reflect="-1" y_reflect="1" orientation="1"/>
   <xacro:arm prefix="arm_r" x_reflect="-1" y_reflect="-1" orientation="-1"/>
   
-  <xacro:macro name="cylinders" params ="prefix radius length parent orientation x_pos y_pos z_pos">
+  <xacro:macro name="cylinders" params ="prefix radius length parent y_orientation z_orientation x_pos y_pos z_pos">
     <link name="${prefix}_link">
       <visual>
         <geometry>
           <cylinder radius="${radius}" length="${length}"/>
         </geometry>
         <material name="White">
-          <color rgba="255 255 255 1"/>
+          <color rgba="0.9 0.9 0.9 1"/>
         </material>
       </visual>
       
@@ -210,13 +187,15 @@
     <joint name="${prefix}_joint" type="fixed">
       <parent link="${parent}_link"/>
       <child link="${prefix}_link"/>
-      <origin xyz="${x_pos} ${y_pos} ${z_pos}" rpy="0 ${orientation} 0"/>
+      <origin xyz="${x_pos} ${y_pos} ${z_pos}" rpy="0 ${y_orientation} ${z_orientation}"/>
     </joint>  
   </xacro:macro>
 
-  <xacro:cylinders prefix="cylinder_1" radius="0.01" length="0.2" parent="arm_l" orientation="0" x_pos="0.2" y_pos="0" z_pos="0"/>
-  <xacro:cylinders prefix="cylinder_2" radius="0.01" length="0.2" parent="arm_r" orientation="0" x_pos="0.2" y_pos="0" z_pos="0"/>
-  <xacro:cylinders prefix="cylinder_base_l" radius="0.02" length="0.38" parent="base" orientation="${pi/2}" x_pos="0" y_pos="0.135" z_pos="0.07"/>
-  <xacro:cylinders prefix="cylinder_base_r" radius="0.02" length="0.38" parent="base" orientation="${pi/2}" x_pos="0" y_pos="-0.135" z_pos="0.07"/>
+  <xacro:cylinders prefix="cylinder_1" radius="0.01" length="0.2" parent="arm_l" y_orientation="0" z_orientation="0" x_pos="0.2" y_pos="0" z_pos="0"/>
+  <xacro:cylinders prefix="cylinder_2" radius="0.01" length="0.2" parent="arm_r" y_orientation="0" z_orientation="0" x_pos="0.2" y_pos="0" z_pos="0"/>
+  <xacro:cylinders prefix="cylinder_base_l" radius="0.02" length="0.38" parent="base" y_orientation="${pi/2}" z_orientation="0" x_pos="0" y_pos="0.135" z_pos="0.07"/>
+  <xacro:cylinders prefix="cylinder_base_r" radius="0.02" length="0.38" parent="base" y_orientation="${pi/2}" z_orientation="0" x_pos="0" y_pos="-0.135" z_pos="0.07"/>
+  <xacro:cylinders prefix="cylinder_base_f" radius="0.02" length="0.27" parent="base" y_orientation="${pi/2}" z_orientation="${pi/2}" x_pos="0.19" y_pos="0" z_pos="0.07"/>
+  <xacro:cylinders prefix="cylinder_base_b" radius="0.02" length="0.27" parent="base" y_orientation="${pi/2}" z_orientation="${pi/2}" x_pos="-0.19" y_pos="0" z_pos="0.07"/>
 
 </robot>
