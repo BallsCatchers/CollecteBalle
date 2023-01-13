@@ -69,7 +69,6 @@ def detect_base(img_RGB):
     else:
         return False, None
 
-
 class Camera(Node):
 
     def __init__(self):
