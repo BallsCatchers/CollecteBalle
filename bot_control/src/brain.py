@@ -8,7 +8,6 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import Bool
 from std_msgs.msg import String
-from geometry_msgs.msg import Vector3
 
 import math
 
@@ -38,11 +37,11 @@ class Main(Node):
         self.__trigger.data = False
 
 
-        self.twist_pub = self.create_publisher(Twist, "cmd_twist", 10)
+        self.twist_pub = self.create_publisher(Twist, "/cmd_vel", 10)
         self.__cmd_twist = Twist()
 
 
-        self.state_pub = self.create_publisher(String, "state", 10)
+        self.state_pub = self.create_publisher(String, "/state", 10)
         # ===============================
         # Main
         # ===============================
