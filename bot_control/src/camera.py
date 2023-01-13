@@ -69,7 +69,6 @@ def detect_base(img_RGB):
     else:
         return False, None
 
-<<<<<<< HEAD
 def detect_marker(img_RGB):
     # Define the range of colors for red and green markers
     lower_red = np.array([0, 0, 200])
@@ -128,10 +127,7 @@ def detect_marker(img_RGB):
 
     # If both markers are found, calculate the orientation of the robot
     if red_x is not None and green_x is not None and red_y is not None and green_y is not None:
-<<<<<<< HEAD
-=======
         print(red_x, red_y, green_x, green_y)
->>>>>>> devel
         position_x = (green_x + red_x)/2
         position_y = (green_y + red_y)/2
         orientation = math.atan2(green_y - red_y, green_x - red_x)
@@ -139,10 +135,6 @@ def detect_marker(img_RGB):
 
     return False, None, None, None
 
-<<<<<<< HEAD
-=======
-
->>>>>>> devel
 class Camera(Node):
 
     def __init__(self):
@@ -189,21 +181,14 @@ class Camera(Node):
             marker_detected, position_x, position_y, orientation = detect_marker(self.image)
             robot_position = []
             if marker_detected:
-<<<<<<< HEAD
-=======
                 self.get_logger().info(f"\Robot detected at: (x,y, theta) = ({position_x},{position_y},{orientation}")
->>>>>>> devel
                 self.get_logger().info(f"\nOrientation : {position_x}\n")
                 self.get_logger().info(f"\nOrientation : {position_y}\n")
                 self.get_logger().info(f"\nOrientation : {orientation}\n")
                 robot_position = [position_x, position_y, orientation]
-<<<<<<< HEAD
-=======
                 cv2.rectangle(self.image,(int(position_x),int(position_y)),(5,5),(255,0,0),2)
                 cv2.rectangle(self.image,(int(position_x + math.cos(orientation)*10),\
                               int(position_y + math.sin(orientation)*10)),(5,5),(255,0,0),2)
->>>>>>> devel
-
             self.image_publisher(ball_positions, base_positions, robot_position)
 
             cv2.imshow("Image window", self.image)
