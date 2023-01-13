@@ -4,7 +4,7 @@
   <!-- Define robot constants -->
   <xacro:property name="base_width" value="0.31"/>
   <xacro:property name="base_length" value="0.42"/>
-  <xacro:property name="base_height" value="0.18"/>
+  <xacro:property name="base_height" value="0.16"/>
 
   <xacro:property name="wheel_radius" value="0.10"/>
   <xacro:property name="wheel_width" value="0.04"/>
@@ -51,8 +51,8 @@
       <geometry>
         <box size="${base_length} ${base_width} ${base_height}"/>
       </geometry>
-      <material name="Cyan">
-        <color rgba="0 1.0 1.0 1.0"/>
+      <material name="White">
+        <color rgba="255 255 255 1"/>
       </material>
     </visual>
     
@@ -64,6 +64,29 @@
 
     <xacro:box_inertia m="15" w="${base_width}" d="${base_length}" h="${base_height}"/>
   </link>
+
+  <link name="base_top_link">
+    <visual>
+      <geometry>
+        <box size="0.38 0.27 0.02"/>
+      </geometry>
+      <material name="White">
+        <color rgba="255 255 255 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.38 0.27 0.02"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_top_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_top_link"/>
+    <origin xyz="0.0 0.0 0.08" rpy="0 0 0"/>
+  </joint>
 
   <!-- Robot Footprint -->
   <link name="base_footprint"/>
@@ -82,8 +105,8 @@
         <geometry>
             <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
         </geometry>
-        <material name="Gray">
-          <color rgba="0.5 0.5 0.5 1.0"/>
+        <material name="White">
+          <color rgba="255 255 255 1"/>
         </material>
       </visual>
 
@@ -119,8 +142,8 @@
         <geometry>
           <box size="${arm_length} ${arm_width} ${arm_height}"/>
         </geometry>
-        <material name="Gray">
-          <color rgba="0.5 0.5 0.5 1.0"/>
+        <material name="White">
+          <color rgba="255 255 255 1"/>
         </material>
       </visual>
       
@@ -144,7 +167,37 @@
   
   <xacro:arm prefix="arm_l" x_reflect="-1" y_reflect="1" orientation="1"/>
   <xacro:arm prefix="arm_r" x_reflect="-1" y_reflect="-1" orientation="-1"/>
+
+  <xacro:macro name="cylinders" params ="prefix radius length parent orientation x_pos y_pos z_pos">
+    <link name="${prefix}_link">
+      <visual>
+        <geometry>
+          <cylinder radius="${radius}" length="${length}"/>
+        </geometry>
+        <material name="White">
+          <color rgba="255 255 255 1"/>
+        </material>
+      </visual>
+      
+      <collision>
+        <geometry>
+          <cylinder radius="${radius}" length="${length}"/>
+        </geometry>
+      </collision>
+    </link>
   
+    <joint name="${prefix}_joint" type="fixed">
+      <parent link="${parent}_link"/>
+      <child link="${prefix}_link"/>
+      <origin xyz="${x_pos} ${y_pos} ${z_pos}" rpy="0 ${orientation} 0"/>
+    </joint>  
+  </xacro:macro>
+
+  <xacro:cylinders prefix="cylinder_1" radius="0.01" length="0.2" parent="arm_l" orientation="0" x_pos="0.2" y_pos="0" z_pos="0"/>
+  <xacro:cylinders prefix="cylinder_2" radius="0.01" length="0.2" parent="arm_r" orientation="0" x_pos="0.2" y_pos="0" z_pos="0"/>
+  <xacro:cylinders prefix="cylinder_base_l" radius="0.02" length="0.38" parent="base" orientation="${pi/2}" x_pos="0" y_pos="0.135" z_pos="0.07"/>
+  <xacro:cylinders prefix="cylinder_base_r" radius="0.02" length="0.38" parent="base" orientation="${pi/2}" x_pos="0" y_pos="-0.135" z_pos="0.07"/>
+
   <!-- Wheel Controllers -->
   <gazebo>
     <plugin name="front_left_wheel_controller" filename="libgazebo_ros_diff_drive.so">
