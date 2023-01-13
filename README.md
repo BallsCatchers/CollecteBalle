@@ -7,18 +7,7 @@ Ceci est un template de dépôt Git pour le cours d'ingénierie système et mod�
 
 ### Dépendences
 
-- Import sam_bot model :
-
-```bash
-cd ~/ros2_ws/src
-git clone https://github.com/ros-planning/navigation2_tutorials.git
-cd navigation2_tutorials/
-rm -r nav2_*
-cd ../..
-colcon build
-```
-
-### Launch the robot only
+### Launch AGATE only
 
 ```
 colcon build
@@ -26,15 +15,7 @@ colcon build
 ros2 launch tennis_bot_description display.launch.py
 ```
 
-### Launch a prototype on the field
-
-```
-colcon build
-. install/setup.bash
-ros2 launch tennis_bot_description spawner_sam.launch.py 
-```
-
-### Launch the BallsCatcher robot on the field
+### Launch AGATE on the field
 
 ```
 colcon build
