@@ -3,7 +3,13 @@ from launch.substitutions import Command, LaunchConfiguration
 import launch_ros
 import os
 
+ROS_DISTRO_ELOQUENT = "eloquent"
+ROS_DISTRO_FOXY = "foxy"
+ROS_DISTRO = os.environ.get("ROS_DISTRO")
+
 def generate_launch_description():
+    executable = "executable" if ROS_DISTRO == ROS_DISTRO_FOXY else "node_executable"
+
     pkg_share = launch_ros.substitutions.FindPackageShare(package='tennis_bot_description').find('tennis_bot_description')
     default_model_path = os.path.join(pkg_share, 'src/description/tennis_bot_description.urdf')
     default_rviz_config_path = os.path.join(pkg_share, 'rviz/urdf_config.rviz')
@@ -46,6 +52,16 @@ def generate_launch_description():
         arguments=['-d', LaunchConfiguration('rvizconfig')],
     )
 
+    # control node
+    control_node = launch_ros.actions.Node(
+        package="bot_control",
+        condition=launch.conditions.IfCondition(LaunchConfiguration("control")),
+        parameters=[{"use_sim_time": True}],
+        output="screen",
+        emulate_tty=True,
+        **{executable: "control_test.py"}
+    )
+
     return launch.LaunchDescription([
         launch.actions.IncludeLaunchDescription( # lance le gazebo
             launch.launch_description_sources.PythonLaunchDescriptionSource(
@@ -55,10 +71,12 @@ def generate_launch_description():
                                             description='Absolute path to robot urdf file'),
         launch.actions.DeclareLaunchArgument(name='rvizconfig', default_value=default_rviz_config_path,
                                             description='Absolute path to rviz config file'),
+        launch.actions.DeclareLaunchArgument(name="control", default_value="true"),
         robot_state_publisher_node,
         joint_state_publisher_node,
         joint_state_publisher_gui_node,
         spawn_entity,
+        control_node,
         rviz_node
     ])
 

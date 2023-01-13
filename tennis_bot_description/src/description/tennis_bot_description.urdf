@@ -19,6 +19,8 @@
   <xacro:property name="arm_zoff" value="0.02"/>
   <xacro:property name="arm_xoff" value="-0.21"/>
 
+  <!-- <xacro:export_env name="WHEEL_DIAMETER" value="${2*wheel_radius}"/> -->
+
   <!-- Define intertial property macros  -->
   <xacro:macro name="box_inertia" params="m w h d">
     <inertial>
@@ -143,4 +145,26 @@
   <xacro:arm prefix="arm_l" x_reflect="-1" y_reflect="1" orientation="1"/>
   <xacro:arm prefix="arm_r" x_reflect="-1" y_reflect="-1" orientation="-1"/>
   
+  <!-- Wheel Controllers -->
+  <gazebo>
+    <plugin name="front_left_wheel_controller" filename="libgazebo_ros_diff_drive.so">
+      <topicName>cmd_vel</topicName>
+      <legacyMode>true</legacyMode>
+      <robotNamespace>/</robotNamespace>
+      <leftJoint>drivewhl_f_l</leftJoint>
+      <rightJoint>drivewhl_f_r</rightJoint>
+      <wheelSeparation>0.2</wheelSeparation>
+      <wheelDiameter>0.2</wheelDiameter>
+    </plugin>
+    <plugin name="rear_left_wheel_controller" filename="libgazebo_ros_diff_drive.so">
+      <topicName>cmd_vel</topicName>
+      <legacyMode>true</legacyMode>
+      <robotNamespace>/</robotNamespace>
+      <leftJoint>drivewhl_b_l</leftJoint>
+      <rightJoint>drivewhl_b_r</rightJoint>
+      <wheelSeparation>0.2</wheelSeparation>
+      <wheelDiameter>0.2</wheelDiameter>
+    </plugin>
+  </gazebo>
+
 </robot>
