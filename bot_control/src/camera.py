@@ -69,7 +69,7 @@ def detect_base(img_RGB):
         return True, base
     else:
         return False, None
-    
+
 import math
 
 def detect_marker(img_RGB):
