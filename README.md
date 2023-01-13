@@ -1,6 +1,7 @@
 # BallsCatchers AGATE
 ## (A)utonomous (G)atherer for (A)dvanced (T)ennis (E)xercise
 
+![logo](/images/324945165_2118673848323594_5974956229308836638_n.gif)
 ## Lancer la simulation
 
 ### Dépendences

@@ -233,24 +233,57 @@
 
   <!-- Wheel Controllers -->
   <gazebo>
-    <plugin name="front_left_wheel_controller" filename="libgazebo_ros_diff_drive.so">
-      <topicName>cmd_vel</topicName>
-      <legacyMode>true</legacyMode>
-      <robotNamespace>/</robotNamespace>
-      <leftJoint>drivewhl_f_l_joint</leftJoint>
-      <rightJoint>drivewhl_f_r_joint</rightJoint>
-      <wheelSeparation>0.2</wheelSeparation>
-      <wheelDiameter>0.2</wheelDiameter>
+
+    <!-- Front wheels -->
+    <plugin name="front_wheel_controller" filename="libgazebo_ros_diff_drive.so">
+<!--       <ros>
+        <namespace>/gzbo</namespace>
+      </ros> -->
+
+      <left_joint>drivewhl_f_l_joint</left_joint>
+      <right_joint>drivewhl_f_r_joint</right_joint>
+
+      <wheel_separation>0.2</wheel_separation>
+      <wheel_diameter>0.2</wheel_diameter>
+
+      <!-- limits -->
+      <max_wheel_torque>20</max_wheel_torque>
+      <max_wheel_acceleration>1.0</max_wheel_acceleration>
+
+      <!-- output -->
+      <publish_odom>true</publish_odom>
+      <robot_base_frame>base_link</robot_base_frame>
     </plugin>
-    <plugin name="rear_left_wheel_controller" filename="libgazebo_ros_diff_drive.so">
-      <topicName>cmd_vel</topicName>
-      <legacyMode>true</legacyMode>
-      <robotNamespace>/</robotNamespace>
-      <leftJoint>drivewhl_b_l_joint</leftJoint>
-      <rightJoint>drivewhl_b_r_joint</rightJoint>
-      <wheelSeparation>0.2</wheelSeparation>
-      <wheelDiameter>0.2</wheelDiameter>
+
+    <!-- Back wheels -->
+    <plugin name="back_wheel_controller" filename="libgazebo_ros_diff_drive.so">
+<!--       <ros>
+        <namespace>/gzbo</namespace>
+      </ros> -->
+
+      <left_joint>drivewhl_b_l_joint</left_joint>
+      <right_joint>drivewhl_b_r_joint</right_joint>
+
+      <wheel_separation>0.2</wheel_separation>
+      <wheel_diameter>0.2</wheel_diameter>
+      <!-- limits -->
+      <max_wheel_torque>20</max_wheel_torque>
+      <max_wheel_acceleration>1.0</max_wheel_acceleration>
+
+      <!-- output -->
+      <publish_odom>true</publish_odom>
+      <robot_base_frame>base_link</robot_base_frame>
     </plugin>
-  </gazebo>
+
+    <!-- Arm -->
+<!--     <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>$(find gazebo_ros2_control_demos)/config/arm_control.yaml</parameters>
+    </plugin> -->
+
+
+
+</gazebo>
 
 </robot>
