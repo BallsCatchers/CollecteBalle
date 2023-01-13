@@ -1,7 +1,5 @@
-# Tennis Ball Collector
-
-Ceci est un template de dépôt Git pour le cours d'ingénierie système et modélisation robotique à l'ENSTA Bretagne en 2023.
-
+# BallsCatchers AGATE
+## (A)utonomous (G)atherer for (A)dvanced (T)ennis (E)xercise
 
 ## Lancer la simulation
 
