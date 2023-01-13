@@ -41,7 +41,6 @@ find_package(rclpy REQUIRED)
 # Installer les executables pythons (dans le dossier scripts)
 install(PROGRAMS
   src/brain.py
-  src/control_test.py
   DESTINATION lib/${PROJECT_NAME}
 )
 install(DIRECTORY
@@ -68,6 +67,10 @@ ament_python_install_package(src)
 # Install Python executables
 install(PROGRAMS
   src/camera.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+install(PROGRAMS
+  src/control_test.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
