@@ -8,6 +8,7 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import Bool
 from std_msgs.msg import String
+from geometry_msgs.msg import Vector3
 
 import math
 
