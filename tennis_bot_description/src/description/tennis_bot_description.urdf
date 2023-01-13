@@ -86,6 +86,29 @@
     <origin xyz="0.0 0.0 0.08" rpy="0 0 0"/>
   </joint>
 
+  <link name="base_top_link">
+    <visual>
+      <geometry>
+        <box size="0.38 0.27 0.02"/>
+      </geometry>
+      <material name="White">
+        <color rgba="255 255 255 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.38 0.27 0.02"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_top_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_top_link"/>
+    <origin xyz="0.0 0.0 0.08" rpy="0 0 0"/>
+  </joint>
+
   <!-- Robot Footprint -->
   <link name="base_footprint"/>
 
