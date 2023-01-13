@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
+import math
 
 from sensor_msgs.msg import Image
 from std_msgs.msg import Float64MultiArray
@@ -10,6 +11,7 @@ import numpy as np
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
 bridge = CvBridge()
+import time
 
 def detect_yellow_balls(image):
     # Convert the image to HSV
@@ -45,8 +47,8 @@ def detect_yellow_balls(image):
 
 def detect_base(img_RGB):
     ## Params
-    lower_orange = np.array([5, 50, 50])
-    upper_orange = np.array([15, 255, 255])
+    lower_orange = np.array([10, 200, 130])
+    upper_orange = np.array([40, 230, 150])
 
     ## detection
     #rgb to hsv
@@ -69,8 +71,6 @@ def detect_base(img_RGB):
         return True, base
     else:
         return False, None
-
-import math
 
 def detect_marker(img_RGB):
     r = 5
@@ -116,7 +116,7 @@ def detect_marker(img_RGB):
         position_x = (green_x + red_x)/2
         position_y = (green_y + red_y)/2
         orientation = math.atan2(green_y - red_y, green_x - red_x)
-        orientation = (orientation - math.pi) % (2 * math.pi)
+        orientation = (- orientation + math.pi) % (2 * math.pi)
         return True, position_x, position_y, orientation
 
     return False, None, None, None
@@ -134,13 +134,17 @@ class Camera(Node):
         self.image = []
         self.get_logger().info(self.get_name() + " is launched")
 
+        #Balls
+        self.nb_balls = 0
+        self.balls = {}
+
     def image_callback(self, msg):
-        # self.get_logger().info('here')
         try:
             self.image = bridge.imgmsg_to_cv2(msg, "bgr8")
             balls_detected, balls = detect_yellow_balls(self.image)
             ball_positions = []
             if balls_detected:
+                #Append for the msg
                 for x, y, radius, area in balls:
                     # self.get_logger().info(f"Yellow balls detected at: (x,y) = ({x},{y}) with r = {radius}")
 
@@ -150,6 +154,11 @@ class Camera(Node):
                      # Add the x and y coordinates of each ball to the ball_positions list
                     ball_positions.append(x)
                     ball_positions.append(y)
+
+                #Display which ball in on the field and when did they spawn
+                if len(self.balls) != len(ball_positions)//2:
+                    self.balls[self.nb_balls] = time.time()
+                    self.nb_balls += 1
 
             base_detected, base = detect_base(self.image)
             base_positions = []
@@ -167,10 +176,10 @@ class Camera(Node):
             marker_detected, position_x, position_y, orientation = detect_marker(self.image)
             robot_position = []
             if marker_detected:
-                self.get_logger().info(f"\Robot detected at: (x,y, theta) = ({position_x},{position_y},{orientation}")
-                self.get_logger().info(f"\nx : {position_x}\n")
-                self.get_logger().info(f"\ny : {position_y}\n")
-                self.get_logger().info(f"\nOrientation : {orientation*180./math.pi}\n")
+                # self.get_logger().info(f"\Robot detected at: (x,y, theta) = ({position_x},{position_y},{orientation}")
+                # self.get_logger().info(f"\nx : {position_x}\n")
+                # self.get_logger().info(f"\ny : {position_y}\n")
+                # self.get_logger().info(f"\nOrientation : {orientation*180./math.pi}\n")
                 robot_position = [position_x, position_y, orientation]
                 cv2.rectangle(self.image,(int(position_x)-2,int(position_y)-2),(int(position_x)+2,int(position_y)+2),(255,0,0),2)
             self.image_publisher(ball_positions, base_positions, robot_position)
