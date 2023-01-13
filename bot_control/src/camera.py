@@ -205,14 +205,14 @@ class Camera(Node):
             # Publish the message
             self.publisher_balls.publish(msg_balls)
 
-        elif base_positions != []:
+        if base_positions != []:
             # Create the Float64MultiArray message for the balls
             msg_base = Float64MultiArray()
             msg_base.data = ball_positions
             # Publish the message
             self.publisher_base.publish(msg_base)
 
-        elif robot_position != []:
+        if robot_position != []:
             msg_orientation = Vector3()
             msg_orientation.x = robot_position[0]
             msg_orientation.y = robot_position[1]
