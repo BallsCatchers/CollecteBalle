@@ -237,8 +237,8 @@
       <topicName>cmd_vel</topicName>
       <legacyMode>true</legacyMode>
       <robotNamespace>/</robotNamespace>
-      <leftJoint>drivewhl_f_l</leftJoint>
-      <rightJoint>drivewhl_f_r</rightJoint>
+      <leftJoint>drivewhl_f_l_joint</leftJoint>
+      <rightJoint>drivewhl_f_r_joint</rightJoint>
       <wheelSeparation>0.2</wheelSeparation>
       <wheelDiameter>0.2</wheelDiameter>
     </plugin>
@@ -246,8 +246,8 @@
       <topicName>cmd_vel</topicName>
       <legacyMode>true</legacyMode>
       <robotNamespace>/</robotNamespace>
-      <leftJoint>drivewhl_b_l</leftJoint>
-      <rightJoint>drivewhl_b_r</rightJoint>
+      <leftJoint>drivewhl_b_l_joint</leftJoint>
+      <rightJoint>drivewhl_b_r_joint</rightJoint>
       <wheelSeparation>0.2</wheelSeparation>
       <wheelDiameter>0.2</wheelDiameter>
     </plugin>
