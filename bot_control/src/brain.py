@@ -9,6 +9,30 @@ from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import Bool
 from std_msgs.msg import String
 
+import math
+
+def sawtooth(theta):
+    return 2 * math.atan(math.tan(theta / 2))
+
+class Robot:
+    def __init__(self):
+        self.x = 0.
+        self.y = 0.
+        self.theta = 0.
+
+        self.K1 = 0.02
+        self.K2 = 0.02
+
+    def move(self, dx, dy):
+        err_x = (dx - self.x)
+        err_y = (dy - self.y)
+        self.x += self.K1 * err_x
+        self.y += self.K1 * err_y
+
+
+    def turn(self, dtheta):
+        err_theta = sawtooth(dtheta - self.theta)
+        self.theta += self.K2 * err_theta
 
 
 class Main(Node):
