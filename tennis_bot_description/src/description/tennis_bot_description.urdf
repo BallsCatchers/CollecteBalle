@@ -330,6 +330,41 @@
   <xacro:spheres prefix="sphere_r_f" radius="0.02" parent="base" x_pos="${-(base_length-0.04)/2}" y_pos="${(base_width-0.04)/2}" z_pos="0.07" />
   <xacro:spheres prefix="sphere_r_b" radius="0.02" parent="base" x_pos="${-(base_length-0.04)/2}" y_pos="${-(base_width-0.04)/2}" z_pos="0.07" />
 
+
+<!-- For joint control -->
+
+<!--   <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+    <joint name="arm_l_joint">
+      <command_interface name="effort">
+        <param name="min">-1000</param>
+        <param name="max">1000</param>  
+      </command_interface>
+      <state_interface name="position">
+        <param name="initial_value">1.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control> -->
+<!-- 
+  <ros2_control name="${name}" type="system">
+      <hardware>
+        <plugin>ign_ros2_control/GazeboSystem</plugin>
+      </hardware>
+      <joint name="arm_l_joint">
+        <command_interface name="position">
+          <param name="min">{-2*pi}</param>
+          <param name="max">{-2*pi}</param>
+        </command>
+        <state_interface name="position" /> -->
+        <!-- <state_interface name="velocity"/> -->
+        <!-- <state_interface name="effort"/> -->
+<!--       </joint>
+    </ros2_control> -->
+
   <!-- Wheel Controllers -->
   <gazebo>
 
@@ -337,6 +372,7 @@
     <plugin name="front_wheel_controller" filename="libgazebo_ros_diff_drive.so">
 <!--       <ros>
         <namespace>/gzbo</namespace>
+        <remapping>cmd_vel:=cmd_twist_front</remapping>
       </ros> -->
 
       <left_joint>drivewhl_f_l_joint</left_joint>
@@ -358,6 +394,7 @@
     <plugin name="back_wheel_controller" filename="libgazebo_ros_diff_drive.so">
 <!--       <ros>
         <namespace>/gzbo</namespace>
+        <remapping>cmd_vel:=cmd_twist</remapping>
       </ros> -->
 
       <left_joint>drivewhl_b_l_joint</left_joint>
@@ -374,15 +411,68 @@
       <robot_base_frame>base_link</robot_base_frame>
     </plugin>
 
+
+
+
+
+
+
+
+<!-- http://classic.gazebosim.org/tutorials?tut=guided_i5&cat=    Link to create plugin  -->
+
+
+
+<!--     <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>arm_l_joint</joint_name>
+      <p_gain>10000</p_gain>
+      <i_gain>0.1</i_gain>
+      <d_gain>5000</d_gain>
+      <i_max>1</i_max>
+      <i_min>-1</i_min>
+      <cmd_max>1000</cmd_max>
+      <cmd_min>-1000</cmd_min>
+    </plugin> -->
+
     <!-- Arm -->
 <!--     <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
       <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node> -->
+      <!-- <parameters>$(find gazebo_ros2_control_demos)/config/arm_control.yaml</parameters> -->
+<!--       <parameters>$(arg simulation_controllers)</parameters>
+    </plugin>
+ --><!--     <plugin filename="libign_ros2_control-system.so" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+      <robot_param>robot_description</robot_param>
       <robot_param_node>robot_state_publisher</robot_param_node>
-      <parameters>$(find gazebo_ros2_control_demos)/config/arm_control.yaml</parameters>
+      <parameters>$(find ignition_ros2_control_test)/config/arm_control.yaml</parameters>
+    </plugin> -->
+
+<!--     <plugin filename="libign_ros2_control-system.so" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>$(find tennis_bot_description)/config/arm_control.yaml</parameters>
     </plugin> -->
 
 
+<!-- 
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <parameters>$(arg (find tennis_bot_description)/config/agate_arm.yaml)</parameters>
+    </plugin>
+ -->
 
+<!--  <plugin filename="libign_ros2_control-system.so" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+   <parameters>$(arg simulation_controllers)</parameters>
+   <controller_manager_node_name>$(arg prefix)controller_manager</controller_manager_node_name>
+ </plugin> -->
 </gazebo>
+
+<!-- <transmission name="arm_left">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="motor1">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="arm_l_joint">
+      <hardwareInterface>EffortJointInterface</hardwareInterface>
+    </joint>
+  </transmission> -->
 
 </robot>
