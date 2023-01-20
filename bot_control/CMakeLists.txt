@@ -73,11 +73,9 @@ install(PROGRAMS
   src/control_test.py
   DESTINATION lib/${PROJECT_NAME}
 )
-
 install(PROGRAMS
-  src/joy_to_gazebo.py
+  src/arm_control.py
   DESTINATION lib/${PROJECT_NAME}
 )
-
 
 ament_package()
