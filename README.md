@@ -22,6 +22,11 @@ colcon build
 ros2 launch tennis_bot_description spawner.launch.py
 ```
 
+Control with the joystick :
+```
+ros2 launch tennis_bot_description spawner_joy.launch.py
+```
+
 ### Launch image processing
 
 ```
@@ -58,6 +63,9 @@ Le dossier `tennis_court` est un package ROS contenant le monde dans lequel le r
 Ce package ne doit pas être modifié.
 Consulter le [README](tennis_court/README.md) du package pour plus d'informations.
 
+### Package `tennis_bot_description`
+
+Le dossier `tennis_bot_description` est un package ROS contenant le model du robot.
 
 ### Documents
 
