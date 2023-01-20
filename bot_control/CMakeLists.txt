@@ -74,5 +74,10 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(PROGRAMS
+  src/joy_to_gazebo.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 
 ament_package()
