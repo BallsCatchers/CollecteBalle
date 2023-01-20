@@ -4,6 +4,10 @@
 ![logo](/images/324945165_2118673848323594_5974956229308836638_n.gif)
 ## Lancer la simulation
 
+
+### Git ref for demo controller
+
+[gazebo_ros2_control_demos](https://github.com/ros-controls/gazebo_ros2_control/tree/master/gazebo_ros2_control_demos)
 ### Dépendences
 Install ros2 foxy from website: [ROS](https://docs.ros.org/en/foxy/Installation.html)
 Ros2 control library :
