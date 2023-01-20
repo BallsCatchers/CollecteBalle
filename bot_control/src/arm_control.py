@@ -25,7 +25,7 @@ class PublisherJointTrajectory(Node):
 
 
         # Read all positions from parameters
-        self.goals = [[0., 0.], [0., 0.]]
+        self.goals = [0., 0.]
 
         # print("Check of goals : ", self.goals)
         publish_topic = "/" + "joint_trajectory_controller" + "/" + "joint_trajectory"
