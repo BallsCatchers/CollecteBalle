@@ -5,11 +5,10 @@ PO: Simon Gervaise
 
 ## Bilan
 
-Pourcentage de tâches réalisées: 60 %
+Pourcentage de tâches réalisées: 57 %
 
 ### Ce qui a fonctionné
 
-- Rendre le robot plus dynamique
 - Pouvoir bouger et contrôler les bras du robot sous Gazebo
 - Rendre le robot plus dynamique par contrôle avec la manette
 - Mise en place d'une norme de programmation : PEP 8
@@ -18,7 +17,9 @@ Pourcentage de tâches réalisées: 60 %
 
 ### Ce qui n'a pas fonctionné
 
-- Pouvoir bouger le robot sous Gazebo
+- Supprimer les balles lorsqu'elles sont dans la zone de dépôt
+- Réaliser un nouveau design du robot
+- Répondre aux contraintes du client pour le design du robot
 
 ### Retour d'expérience du PO
 
