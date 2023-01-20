@@ -22,6 +22,13 @@ colcon build
 ros2 launch tennis_bot_description spawner.launch.py
 ```
 
+### Launch image processing
+
+```
+colcon build
+. install/setup.bash
+ros2 run bot_control camera.py
+```
 
 ## Groupe
 
