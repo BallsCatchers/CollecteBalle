@@ -1,7 +1,6 @@
-# Debrief du xx/xx/xxxx
+# Debrief du 15/02/2023
 
 PO: Augustin MORGE
-Debrief du 15/02/2023
 
 
 ## Bilan
