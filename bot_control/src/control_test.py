@@ -11,7 +11,7 @@ class Main(Node):
     def __init__(self):
         super().__init__("MainBallCatcher")
 
-        self.twist_pub = self.create_publisher(Twist, "cmd_twist", 10)
+        self.twist_pub = self.create_publisher(Twist, "cmd_vel", 10)
         self.__cmd_twist = Twist()
 
         timer_period = 0.1
