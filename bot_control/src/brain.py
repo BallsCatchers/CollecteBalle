@@ -2,6 +2,7 @@
 import rclpy
 import time
 from rclpy.node import Node
+import numpy as np
 
 # from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
@@ -22,13 +23,13 @@ class Main(Node):
         # ===============================
         # Subscriptions 
         # ===============================
-        self.input_balls = self.create_subscription(Float64MultiArray, "/tennis_balls", self.sub_balls, 10)
-        self.__balls = []
+        self.input_goal = self.create_subscription(Vector3, "/ball_goal", self.sub_goal, 10)
+        self.__goal = []
 
         self.__bases = self.create_subscription(Float64MultiArray, "/bases", self.sub_bases, 10)
         self.__bases = []
 
-        self.__pose = self.create_subscription(Vector3, "/pose_bot", self.get_pose, 10)
+        self.__pose = self.create_subscription(Vector3, "/bot_pos", self.get_pose, 10)
 
         # ===============================
         # Publishers
@@ -56,43 +57,45 @@ class Main(Node):
         self.y = 0.
         self.theta = 0.
 
-        self.K1 = 0.02
-        self.K2 = 0.02
+        self.K1 = 0.0001
+        self.K2 = 2
 
         timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.process)
         self.get_logger().info(self.get_name() + " is launched")
 
-    def sub_balls(self, msg):
-        self.get_logger().info(self.get_name() + " got tennis balls")
+    def sub_bases(self, msg):
+        # self.get_logger().info(self.get_name() + " got bases")
         self.__balls = msg.data
 
-    def sub_bases(self, msg):
-        self.get_logger().info(self.get_name() + " got bases")
-        self.__balls = msg.data
-    
+
+    def sub_goal(self, msg):
+        self.__goal=[msg.x, msg.y]
+        # self.get_logger().info(self.get_name() + " got goal !")
+
+
     def get_pose(self, msg):
-        self.get_logger().info(self.get_name() + " got pose")
-        self.x = msg.data.x
-        self.y = msg.data.y
-        self.theta = msg.data.theta
+        # self.get_logger().info(self.get_name() + " got pose")
+        self.x = msg.x
+        self.y = msg.y
+        self.theta = msg.z
     
     def move(self, dx, dy):
         err_x = (dx - self.x)
         err_y = (dy - self.y)
         d = err_x ** 2 + err_y ** 2
-        self.__cmd_twist.linear.x = self.K1 * d
-        self.__cmd_twist.linear.y = self.K1 * d
+        self.__cmd_twist.linear.x = float(max(min(self.K1 * d, 1.5), 0.4))
+        # self.__cmd_twist.linear.y = self.K1 * d
 
 
     def turn(self, dtheta):
-        err_theta = sawtooth(dtheta - self.theta)
+        err_theta = sawtooth(self.theta - dtheta)
         self.__cmd_twist.angular.z = self.K2 * err_theta
 
     def process(self):
 
         chrono = time.time() - self.__chrono
-        if chrono >= 30 and self.__state == "get_balls":
+        if chrono >= 60.*4 and self.__state == "get_balls":
             self.__state = "come_back"
             self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
 
@@ -107,33 +110,29 @@ class Main(Node):
         self.state_pub.publish(msg_state)
 
         if self.__state == "get_balls":
-            distance_min = 1e10
-            n_b = 0
-            closest_b = 0
-            for xb, yb in self.__balls:
-                distance_b = (x - xb) ** 2 + (y - yb) ** 2
-                if distance_b < distance_min:
-                    distance_min = distance_b
-                    closest_b = n_b
-                n_b += 1
-            x_target, y_target = self.__balls[closest_b], self.__balls[closest_b + 1]
-        
-            self.move(x_target, y_target)
-            self.turn(math.atan2(y_target, x_target))
+            if len(self.__goal) != 0:
+                x_target, y_target = self.__goal[0], self.__goal[1]
+                angle = math.atan2(self.y - y_target, self.x - x_target)
+                # print("Angle : ", angle*180./np.pi)
+                # print("Bot : ", self.theta*180./np.pi)
+                self.move(x_target, y_target)
+                self.turn(angle)
         
         if self.__state == "come_back":
-            if self.x < x_filet:
-                # left
-                self.move(x_base_left, y_base_left)
-                self.turn(math.atan2(y_base_left, x_base_left))
+            x_filet = 500.
+            self.__trigger.data = True
+            # if self.x < x_filet:
+            #     # left
+            #     self.move(x_base_left, y_base_left)
+            #     self.turn(math.atan2(y_base_left, x_base_left))
 
-            else:
-                # right
-                self.move(x_base_right, y_base_right)
-                self.turn(math.atan2(y_base_right, x_base_right))
+            # else:
+            #     # right
+            #     self.move(x_base_right, y_base_right)
+            #     self.turn(math.atan2(y_base_right, x_base_right))
         
         self.twist_pub.publish(self.__cmd_twist)
-
+        self.get_logger().info("Twist published : " + str(self.__cmd_twist.linear.x) + ", " + str(self.__cmd_twist.linear.y) + ", " + str(self.__cmd_twist.angular.z))
         # self.get_logger().info(self.get_name() + " Running")
         # self.get_logger().info(self.get_name() + " : " + str(len(self.__balls)))
 

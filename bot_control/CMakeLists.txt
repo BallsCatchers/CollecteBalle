@@ -67,15 +67,19 @@ ament_python_install_package(src)
 # Install Python executables
 install(PROGRAMS
   src/camera.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-install(PROGRAMS
+  src/cameraV2.py
   src/control_test.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-install(PROGRAMS
   src/arm_control.py
   DESTINATION lib/${PROJECT_NAME}
 )
+
+# install(PROGRAMS
+#   src/control_test.py
+#   DESTINATION lib/${PROJECT_NAME}
+# )
+# install(PROGRAMS
+#   src/arm_control.py
+#   DESTINATION lib/${PROJECT_NAME}
+# )
 
 ament_package()
