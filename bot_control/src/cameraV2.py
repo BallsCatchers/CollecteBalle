@@ -115,7 +115,7 @@ def detect_marker(img_RGB):
         position_x = (green_x + red_x)/2
         position_y = (green_y + red_y)/2
         orientation = math.atan2(green_y - red_y, green_x - red_x)
-        orientation = (- orientation + math.pi) % (2 * math.pi)
+        # orientation = (- orientation + math.pi) % (2 * math.pi)
         return True, position_x, position_y, orientation
 
     return False, None, None, None
@@ -164,7 +164,11 @@ class Camera(Node):
     def process(self):
         if self.input_received:
             balls = detect_yellow_balls(self.image)
+            marker_detected, position_x, position_y, orientation = detect_marker(self.image)
+            base_detected, base = detect_base(self.image)
+
             ball_positions, base_positions, robot_position = [], [], []
+            
             # self.get_logger().info("\n=========================\n")
             # self.get_logger().info("Found " + str(len(balls)) + " balls in img")
 
@@ -211,7 +215,6 @@ class Camera(Node):
             # self.get_logger().info(" length of new balls : " + str(len(n_balls)))
 
 
-
             # #Affichage
             for i in range(len(self.balls)):
                 t = self.balls[i][0]
@@ -222,9 +225,6 @@ class Camera(Node):
                 cv2.circle(self.image, (int(x), int(y)), int(radius), (0, 0, 255), -1)
                 cv2.putText(self.image, "Ball " + str(i+1), (int(x-radius-20), int(y-radius-20)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 cv2.putText(self.image, "Time: " + time.strftime('%Mmin %Ss', time.gmtime(time.time()-self.balls[i][0])), (int(x-radius-20), int(y-radius-20+15)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-
-            base_detected, base = detect_base(self.image)
-            base_positions = []
             if base_detected:
                 for x, y, w, h in base:
                     # self.get_logger().info(f"\nBase detected at: (x,y) = ({x},{y}) with size (w,h) = ({w},{h})\n")
@@ -234,8 +234,6 @@ class Camera(Node):
                     base_positions.append(y * 1.0)
 
 
-            marker_detected, position_x, position_y, orientation = detect_marker(self.image)
-            robot_position = []
             if marker_detected:
                 # self.get_logger().info(f"\Robot detected at: (x,y, theta) = ({position_x},{position_y},{orientation*180./math.pi}")
                 robot_position = [position_x, position_y, orientation]

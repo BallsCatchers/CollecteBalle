@@ -66,7 +66,7 @@ class PublisherJointTrajectory(Node):
     	if self.__trig.data:
     		self.goals = [-2., 2.]  # Closed state
     	else:
-    		self.goals = [0.2, -0.2]  # Open state
+    		self.goals = [0., -0.]  # Open state
     	# self.get_logger().info('Send goals : ' + str(self.goals[0]) + ', ' + str(self.goals[1]))
 
 def main(args=None):

@@ -95,6 +95,17 @@ def generate_launch_description():
         **{executable: "control_test.py"}
     )
 
+    # camera node
+    camera_node = launch_ros.actions.Node(
+        package="bot_control",
+        condition=launch.conditions.IfCondition(LaunchConfiguration("control")),
+        parameters=[{"use_sim_time": True}],
+        output="screen",
+        emulate_tty=True,
+        **{executable: "cameraV2.py"}
+    )
+
+
     arm_control = launch_ros.actions.Node(
         package="bot_control",
         condition=launch.conditions.IfCondition(LaunchConfiguration("control")),
@@ -133,6 +144,7 @@ def generate_launch_description():
         spawn_entity,
         control_node,
         arm_control,
-        rviz_node
+        camera_node
+        # rviz_node
     ])
 
