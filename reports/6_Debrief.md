@@ -5,7 +5,7 @@ PO: Augustin MORGE
 
 ## Bilan
 
-Pourcentage de tâches réalisées: ... %
+Pourcentage de tâches réalisées: 100 %
 
 ### Ce qui a fonctionné
 
@@ -20,8 +20,13 @@ Pourcentage de tâches réalisées: ... %
 
 ###### A compléter.
 
-  - Merge le design du robot avec trou et la loi de commande pour voir si cela fonctionne.
   - Commander avec la manette le robot.
+
+### A faire pour la prochainne fois
+
+###### A compléter.
+
+  - Merge le design du robot avec trou et la loi de commande pour voir si cela fonctionne.
 
 ### Retour d'expérience du PO
 
