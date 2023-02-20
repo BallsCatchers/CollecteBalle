@@ -218,7 +218,6 @@ class Camera(Node):
         if len(self.balls) > 0:
             xg, yg = self.balls[0][1], self.balls[0][2]
             hauteur = (y_min + y_max); largeur = (x_min + x_max)
-            print(xg,yg)
 
             if largeur/2 - position_x > 0: #Le robot est à gauche
                 if largeur/2 - xg > 0: #La target est aussi à gauche
@@ -271,7 +270,7 @@ class Camera(Node):
             base_detected, base = detect_base(self.image)
 
             ball_positions, base_positions, robot_position = [], [], []
-            
+
             if base_detected:
                 for x, y, w, h in base:
                     # self.get_logger().info(f"\nBase detected at: (x,y) = ({x},{y}) with size (w,h) = ({w},{h})\n")
@@ -294,7 +293,7 @@ class Camera(Node):
 
 
             # Reset the update state of each balls
-            for i in self.balls:    
+            for i in self.balls:
                 i[3] = False
 
             # For each detected ball:
@@ -321,7 +320,7 @@ class Camera(Node):
                             d = np.sqrt((self.balls[j][1]-x)**2 + (self.balls[j][2]-y)**2)
                             if d < d_min:
                                 d_min = d # Finding the minimal distance for matching
-                                index_j = j # Getting the corresponding index in the already found list if it exist 
+                                index_j = j # Getting the corresponding index in the already found list if it exist
                         # self.get_logger().info("Params : d_min :" + str(d_min) + ", index of closest : " + str(index_j))
                         if d_min > 3:
                             # self.get_logger().info("new ball added ! Pos : " + str(x) + ", " + str(y))
@@ -380,9 +379,6 @@ class Camera(Node):
             # self.publisher_goal.publish(goal_ball)
 
             if goal != []:
-                print(goal)
-                print(goal[0])
-                print(goal[1],'\n')
                 goal_ball = Vector3()
                 goal_ball.x = float(goal[0])
                 goal_ball.y = float(goal[1])
