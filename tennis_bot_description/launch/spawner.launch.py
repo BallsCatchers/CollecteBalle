@@ -63,13 +63,6 @@ def generate_launch_description():
         # condition=launch.conditions.UnlessCondition(LaunchConfiguration('gui'))
     )
 
-    # joint_state_publisher_gui_node = launch_ros.actions.Node(
-    #     package='joint_state_publisher_gui',
-    #     executable='joint_state_publisher_gui',
-    #     name='joint_state_publisher_gui',
-    #     condition=launch.conditions.IfCondition(LaunchConfiguration('gui'))
-    # )
-
     spawn_entity = launch_ros.actions.Node( # fait spawn le robot
     	package='gazebo_ros', 
     	executable='spawn_entity.py',
@@ -83,16 +76,6 @@ def generate_launch_description():
         name='rviz2',
         output='screen',
         arguments=['-d', LaunchConfiguration('rvizconfig')],
-    )
-
-    # control node
-    control_node = launch_ros.actions.Node(
-        package="bot_control",
-        condition=launch.conditions.IfCondition(LaunchConfiguration("control")),
-        parameters=[{"use_sim_time": True}],
-        output="screen",
-        emulate_tty=True,
-        **{executable: "control_test.py"}
     )
 
     # camera node
@@ -142,7 +125,6 @@ def generate_launch_description():
         joint_state_publisher_node,
         # joint_state_publisher_gui_node,
         spawn_entity,
-        control_node,
         arm_control,
         camera_node
         # rviz_node
