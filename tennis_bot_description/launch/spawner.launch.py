@@ -92,7 +92,7 @@ def generate_launch_description():
         parameters=[{"use_sim_time": True}],
         output="screen",
         emulate_tty=True,
-        **{executable: "control_test.py"}
+        **{executable: "brain.py"}
     )
 
     # camera node

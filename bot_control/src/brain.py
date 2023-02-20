@@ -57,8 +57,8 @@ class Main(Node):
         self.y = 0.
         self.theta = 0.
 
-        self.K1 = 0.0001
-        self.K2 = 2
+        self.K1 = 0.00005
+        self.K2 = 2.4
 
         timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.process)
@@ -84,7 +84,12 @@ class Main(Node):
         err_x = (dx - self.x)
         err_y = (dy - self.y)
         d = err_x ** 2 + err_y ** 2
-        self.__cmd_twist.linear.x = float(max(min(self.K1 * d, 1.5), 0.4))
+        v_x = float(max(min(self.K1 * d, 1.2), 0.6))
+        self.__cmd_twist.linear.x = v_x
+        if v_x > 0.8:
+            self.__trigger.data = True
+        else:
+            self.__trigger.data = False
         # self.__cmd_twist.linear.y = self.K1 * d
 
 
@@ -115,6 +120,7 @@ class Main(Node):
                 angle = math.atan2(self.y - y_target, self.x - x_target)
                 # print("Angle : ", angle*180./np.pi)
                 # print("Bot : ", self.theta*180./np.pi)
+                if ((x_target - self.x)**2 + (y_target - self.y)**2)
                 self.move(x_target, y_target)
                 self.turn(angle)
         
