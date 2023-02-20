@@ -18,7 +18,7 @@ def generate_launch_description():
     executable = "executable" if ROS_DISTRO == ROS_DISTRO_FOXY else "node_executable"
 
     pkg_share = launch_ros.substitutions.FindPackageShare(package='tennis_bot_description').find('tennis_bot_description')
-    default_model_path = os.path.join(pkg_share, 'src/description/tennis_bot_description.urdf')
+    default_model_path = os.path.join(pkg_share, 'src/description/tennis_bot_description_2.urdf')
     default_rviz_config_path = os.path.join(pkg_share, 'rviz/urdf_config.rviz')
 
     pkg_share = launch_ros.substitutions.FindPackageShare(package='tennis_court').find('tennis_court')
@@ -32,7 +32,7 @@ def generate_launch_description():
                 [
                     FindPackageShare("tennis_bot_description"),
                     "src/description",
-                    "tennis_bot_description.urdf",
+                    "tennis_bot_description_2.urdf",
                 ]
             ),
         ]
