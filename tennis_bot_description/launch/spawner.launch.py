@@ -18,7 +18,7 @@ def generate_launch_description():
     executable = "executable" if ROS_DISTRO == ROS_DISTRO_FOXY else "node_executable"
 
     pkg_share = launch_ros.substitutions.FindPackageShare(package='tennis_bot_description').find('tennis_bot_description')
-    default_model_path = os.path.join(pkg_share, 'src/description/tennis_bot_description.urdf')
+    default_model_path = os.path.join(pkg_share, 'src/description/tennis_bot_description_2.urdf')
     default_rviz_config_path = os.path.join(pkg_share, 'rviz/urdf_config.rviz')
 
     pkg_share = launch_ros.substitutions.FindPackageShare(package='tennis_court').find('tennis_court')
@@ -32,7 +32,7 @@ def generate_launch_description():
                 [
                     FindPackageShare("tennis_bot_description"),
                     "src/description",
-                    "tennis_bot_description.urdf",
+                    "tennis_bot_description_2.urdf",
                 ]
             ),
         ]
@@ -63,13 +63,6 @@ def generate_launch_description():
         # condition=launch.conditions.UnlessCondition(LaunchConfiguration('gui'))
     )
 
-    # joint_state_publisher_gui_node = launch_ros.actions.Node(
-    #     package='joint_state_publisher_gui',
-    #     executable='joint_state_publisher_gui',
-    #     name='joint_state_publisher_gui',
-    #     condition=launch.conditions.IfCondition(LaunchConfiguration('gui'))
-    # )
-
     spawn_entity = launch_ros.actions.Node( # fait spawn le robot
     	package='gazebo_ros',
     	executable='spawn_entity.py',
@@ -92,7 +85,7 @@ def generate_launch_description():
         parameters=[{"use_sim_time": True}],
         output="screen",
         emulate_tty=True,
-        **{executable: "control_test.py"}
+        **{executable: "brain.py"}
     )
 
     # camera node
@@ -142,7 +135,6 @@ def generate_launch_description():
         joint_state_publisher_node,
         # joint_state_publisher_gui_node,
         spawn_entity,
-        control_node,
         arm_control,
         camera_node
         # rviz_node

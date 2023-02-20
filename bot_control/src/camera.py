@@ -64,7 +64,7 @@ def detect_base(img_RGB):
     for c in contours:
         x,y,w,h = cv2.boundingRect(c)
         # Append the rectangle's information to the list
-        if w > 10: # Avoid unwanted detection
+        if w > 15: # Avoid unwanted detection
             base.append((x, y, w, h))
 
     if base:
@@ -155,9 +155,9 @@ class Camera(Node):
         self.publisher_balls = self.create_publisher(Float64MultiArray, '/tennis_balls', 10)
         self.publisher_base = self.create_publisher(Float64MultiArray, '/bases', 10)
         self.publisher_robot = self.create_publisher(Vector3, '/bot_pos', 10)
-
         self.publisher_goal = self.create_publisher(Vector3, '/ball_goal', 10)
 
+        self.publisher_goal = self.create_publisher(Vector3, '/ball_goal', 10)
 
         #Image
         self.input_received = False
@@ -271,6 +271,21 @@ class Camera(Node):
             base_detected, base = detect_base(self.image)
 
             ball_positions, base_positions, robot_position = [], [], []
+            
+            if base_detected:
+                for x, y, w, h in base:
+                    # self.get_logger().info(f"\nBase detected at: (x,y) = ({x},{y}) with size (w,h) = ({w},{h})\n")
+                    cv2.rectangle(self.image,(int(x),int(y)),(int(x)+int(w),int(y)+int(h)),(255,0,0),2)
+                     # Add the x and y coordinates of each ball to the ball_positions list
+                    base_positions.append(x * 1.0)
+                    base_positions.append(y * 1.0)
+                    base_positions.append(x * 1.0 + w)
+                    base_positions.append(y * 1.0 + h)
+
+            # dx, dy = [], []
+            # for i in range(0, len(base_positions), 4):
+            #     self.get_logger().info("Base loop step :" + str(i))
+            #     dx = base_positions[i]
 
             # self.get_logger().info("\n=========================\n")
             # self.get_logger().info("Found " + str(len(balls)) + " balls in img")
@@ -279,38 +294,44 @@ class Camera(Node):
 
 
             # Reset the update state of each balls
-            for i in self.balls:
+            for i in self.balls:    
                 i[3] = False
 
             # For each detected ball:
             for i in range(len(balls)):
-                x, y, radius, area = balls[i][0], balls[i][1], balls[i][2], balls[i][3]
 
-                #Publication
-                ball_positions.append(x)
-                ball_positions.append(y)
+                # Check if the ball is in the base
+                if base_detected:
+                    x, y, radius, area = balls[i][0], balls[i][1], balls[i][2], balls[i][3]
+                    in_base = False
+                    for xb, yb, w, h in base:
+                        if xb < x < xb + w and yb < y < yb + h:
+                            in_base = True
 
-                # Reset of min values
-                d_min = np.inf
-                index_j = None
+                    if not in_base:
+                        #Publication
+                        ball_positions.append(x)
+                        ball_positions.append(y)
 
-                for j in range(len(self.balls)):
-                    d = np.sqrt((self.balls[j][1]-x)**2 + (self.balls[j][2]-y)**2)
-                    if d < d_min:
-                        d_min = d # Finding the minimal distance for matching
-                        index_j = j # Getting the corresponding index in the already found list if it exist
-                # self.get_logger().info("Params : d_min :" + str(d_min) + ", index of closest : " + str(index_j))
-                if d_min > 3:
-                    # self.get_logger().info("new ball added ! Pos : " + str(x) + ", " + str(y))
-                    self.balls.append([time.time(), x, y, True])
-                else:
-                    # Update the corresponding ball in the self.balls list
-                    # self.get_logger().info("Updated ball nb " + str(index_j))
-                    self.balls[index_j][1] = x
-                    self.balls[index_j][2] = y
-                    self.balls[index_j][3] = True
-                # else:
-                #     print("fail to add the ball, d_min  : ", d_min, ', and pos : ', x, y)
+                        # Reset of min values
+                        d_min = np.inf
+                        index_j = None
+
+                        for j in range(len(self.balls)):
+                            d = np.sqrt((self.balls[j][1]-x)**2 + (self.balls[j][2]-y)**2)
+                            if d < d_min:
+                                d_min = d # Finding the minimal distance for matching
+                                index_j = j # Getting the corresponding index in the already found list if it exist 
+                        # self.get_logger().info("Params : d_min :" + str(d_min) + ", index of closest : " + str(index_j))
+                        if d_min > 3:
+                            # self.get_logger().info("new ball added ! Pos : " + str(x) + ", " + str(y))
+                            self.balls.append([time.time(), x, y, True])
+                        else:
+                            # Update the corresponding ball in the self.balls list
+                            # self.get_logger().info("Updated ball nb " + str(index_j))
+                            self.balls[index_j][1] = x
+                            self.balls[index_j][2] = y
+                            self.balls[index_j][3] = True
 
             # Removing all the unupdated balls
             n_balls = [self.balls[i] for i in range(len(self.balls)) if self.balls[i][3]]
@@ -328,13 +349,6 @@ class Camera(Node):
                 cv2.circle(self.image, (int(x), int(y)), int(radius), (0, 0, 255), -1)
                 cv2.putText(self.image, "Ball " + str(i+1), (int(x-radius-20), int(y-radius-20)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 cv2.putText(self.image, "Time: " + time.strftime('%Mmin %Ss', time.gmtime(time.time()-self.balls[i][0])), (int(x-radius-20), int(y-radius-20+15)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-            if base_detected:
-                for x, y, w, h in base:
-                    # self.get_logger().info(f"\nBase detected at: (x,y) = ({x},{y}) with size (w,h) = ({w},{h})\n")
-                    cv2.rectangle(self.image,(int(x),int(y)),(int(x)+int(w),int(y)+int(h)),(255,0,0),2)
-                     # Add the x and y coordinates of each ball to the ball_positions list
-                    base_positions.append(x * 1.0)
-                    base_positions.append(y * 1.0)
 
 
             if marker_detected:
