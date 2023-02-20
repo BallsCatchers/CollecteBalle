@@ -120,6 +120,32 @@ def detect_marker(img_RGB):
 
     return False, None, None, None
 
+def detect_net(img_RGB):
+
+    # Obtenir la taille de l'image
+    hauteur, largeur, _ = img_RGB.shape
+
+    print(f"hauteur = {hauteur}; largeur = {largeur}")
+
+    # Définir les coordonnées du rectangle du filet
+    x_min = int(largeur / 2 - largeur * 0.005)
+    x_max = int(largeur / 2 + largeur * 0.005)
+    y_min = int(hauteur * 0.14)
+    y_max = int(hauteur * 0.86)
+
+    net = [x_min, y_min, x_max, y_max]
+
+    doors_up_right = (int(largeur / 2 - largeur * 0.08), int(hauteur * 0.2)//2)
+    doors_up_left = (int(largeur / 2 + largeur * 0.08), int(hauteur * 0.2)//2)
+    doors_up = [doors_up_left, doors_up_right]
+
+    doors_down_right = (int(largeur / 2 - largeur * 0.08) , (int(hauteur) + int(hauteur * 0.8))//2)
+    doors_down_left = (int(largeur / 2 + largeur * 0.08) , (int(hauteur) + int(hauteur * 0.8))//2)
+    doors_down = [doors_down_left, doors_down_right]
+
+    return(net, doors_up, doors_down)
+
+
 
 class Camera(Node):
 
@@ -159,6 +185,83 @@ class Camera(Node):
         except CvBridgeError:
             self.get_logger().info(self.get_name() + " CvBridgeError !! Cannot convert img from ros msg to CV2 !")
             pass
+
+    def go_to_target(self, robot_position):
+        # self.get_logger().info(f"\Robot detected at: (x,y, theta) = ({position_x},{position_y},{orientation*180./math.pi}")
+        position_x, position_y, orientation = [i for i in robot_position]
+
+        cv2.rectangle(self.image,(int(position_x)-2,int(position_y)-2),(int(position_x)+2,int(position_y)+2),(255,0,0),2)
+
+
+        # Dessiner le rectangle du filet sur l'image et les portes
+        net, doors_up, doors_down = detect_net(self.image)
+        x_min, y_min, x_max, y_max = [i for i in net]
+        doors_up_right, doors_up_left = [i for i in doors_up]
+        doors_down_right, doors_down_left = [i for i in doors_down]
+
+        #Filet
+        cv2.rectangle(self.image, (x_min, y_min), (x_max, y_max), (0, 0, 255), 2)
+
+        #Portes
+        cv2.circle(self.image, (int(doors_up_right[0]), int(doors_up_right[1])), int(10), (255, 0, 0), -1)
+        cv2.putText(self.image, "doors_up_right", (int(doors_up_right[0]), int(doors_up_right[1])), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
+        cv2.circle(self.image, (int(doors_up_left[0]), int(doors_up_left[1])), int(10), (255, 0, 0), -1)
+        cv2.putText(self.image, "doors_up_left", (int(doors_up_left[0]), int(doors_up_left[1])), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
+        cv2.circle(self.image, (int(doors_down_right[0]), int(doors_down_right[1])), int(10), (255, 0, 0), -1)
+        cv2.putText(self.image, "doors_down_right", (int(doors_down_right[0]), int(doors_down_right[1])), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
+        cv2.circle(self.image, (int(doors_down_left[0]), int(doors_down_left[1])), int(10), (255, 0, 0), -1)
+        cv2.putText(self.image, "doors_down_left", (int(doors_down_left[0]), int(doors_down_left[1])), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
+        if len(self.balls) > 0:
+            xg, yg = self.balls[0][1], self.balls[0][2]
+            hauteur = (y_min + y_max); largeur = (x_min + x_max)
+            print(xg,yg)
+
+            if largeur/2 - position_x > 0: #Le robot est à gauche
+                if largeur/2 - xg > 0: #La target est aussi à gauche
+                    goal = (int(xg), int(yg))
+                    cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                else: #C'est pas du même côté
+                    if hauteur/2 - yg > 0: #En haut à gauche
+                        if hauteur*0.1 - position_y > 0: #Très en haut à gauche
+                            goal = (int(doors_up_right[0]), int(doors_up_right[1]))
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                        else:
+                            goal = (int(doors_up_left[0]), int(doors_up_left[1]))
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                    else: #En bas à gauche
+                        if hauteur*0.9 - position_y > 0: #Très en bas à gauche
+                            goal = (int(doors_down_left[0]), int(doors_down_left[1]))
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                        else:
+                            goal = (int(doors_down_right[0]), int(doors_down_right[1]))
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+
+            else: #Le robot est à droite
+                if largeur/2 - xg <= 0: #La target est aussi à droite
+                    goal = (int(xg), int(yg))
+                    cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                else: #Pas du même côté
+                    if hauteur/2 - yg > 0: #En haut à droite
+                        if hauteur*0.1 - position_y > 0: #Très en haut à droite
+                            goal = (int(doors_up_left[0]), int(doors_up_left[1]))
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                        else:
+                            goal = (int(doors_up_right[0]), int(doors_up_right[1]))
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                    else:
+                        if hauteur*0.9 - position_y > 0: #Très en bas à gauche
+                            goal = (int(doors_down_right[0]), int(doors_down_right[1]))
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                        else:
+                            goal = (int(doors_down_left[0]), int(doors_down_left[1]))
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+
+            return(goal)
+        return []
 
 
     def process(self):
@@ -239,15 +342,16 @@ class Camera(Node):
                 robot_position = [position_x, position_y, orientation]
                 cv2.rectangle(self.image,(int(position_x)-2,int(position_y)-2),(int(position_x)+2,int(position_y)+2),(255,0,0),2)
 
+                goal = self.go_to_target(robot_position)
 
+                self.image_publisher(ball_positions, base_positions, robot_position, goal)
 
-            self.image_publisher(ball_positions, base_positions, robot_position)
             cv2.imshow("Image window", self.image)
             cv2.waitKey(1)  # it will prevent the window from freezing
             self.input_received = False
 
 
-    def image_publisher(self, ball_positions, base_positions, robot_position):
+    def image_publisher(self, ball_positions, base_positions, robot_position, goal):
         if ball_positions != []:
             # Create the Float64MultiArray message for the balls
             msg_balls = Float64MultiArray()
@@ -255,11 +359,20 @@ class Camera(Node):
             # Publish the message
             self.publisher_balls.publish(msg_balls)
 
-            goal_ball = Vector3()
-            oldest_ball = self.balls[0]
-            goal_ball.x = oldest_ball[1]
-            goal_ball.y = oldest_ball[2]
-            self.publisher_goal.publish(goal_ball)
+            # goal_ball = Vector3()
+            # oldest_ball = self.balls[0]
+            # goal_ball.x = oldest_ball[1]
+            # goal_ball.y = oldest_ball[2]
+            # self.publisher_goal.publish(goal_ball)
+
+            if goal != []:
+                print(goal)
+                print(goal[0])
+                print(goal[1],'\n')
+                goal_ball = Vector3()
+                goal_ball.x = float(goal[0])
+                goal_ball.y = float(goal[1])
+                self.publisher_goal.publish(goal_ball)
 
         if base_positions != []:
             # Create the Float64MultiArray message for the base
