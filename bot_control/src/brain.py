@@ -54,6 +54,7 @@ class Main(Node):
         self.__t_last_detect = None
         self.__nb_balls = 0
         self.__home = False
+        self.__done = False
 
         self.x = 0.
         self.y = 0.
@@ -68,7 +69,9 @@ class Main(Node):
 
     def sub_bases(self, msg):
         # self.get_logger().info(self.get_name() + " got bases")
-        self.__balls = msg.data
+        self.__bases = msg.data
+        # self.get_logger().info("Going home : " + str(len(self.__bases)) + ", first element : " + str(self.__bases[0]))
+
 
 
     def sub_goal(self, msg):
@@ -104,14 +107,21 @@ class Main(Node):
         chrono = time.time() - self.__chrono
 
 
-        if chrono >= 60.*2 and self.__state == "get_balls":
+        if chrono >= 45.*1 and self.__state == "get_balls":
             self.__state = "come_back"
             self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
 
         if self.__state == "come_back" and self.__home :
-            self.__state = "get_balls"
+            self.__state = "home"
             self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
+            self.__home = False
+
+        if self.__state == "home" and self.__done :
+            self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
+            self.__state = "get_balls"
             self.__chrono = time.time()
+            self.__done = False
+
 
         msg_state = String()
         msg_state.data = self.__state
@@ -124,36 +134,75 @@ class Main(Node):
                 angle = math.atan2(self.y - y_target, self.x - x_target)
                 # print("Angle : ", angle*180./np.pi)
                 # print("Bot : ", self.theta*180./np.pi)
-                d = np.sqrt((x_target - self.x)**2 + (y_target - self.y)**2)
-                if d < 12 :
-                    self.__t_last_detect = time.time()
-                    self.get_logger().info(self.get_name() + " bot close to goal : " + str(d))
+                # d = np.sqrt((x_target - self.x)**2 + (y_target - self.y)**2)
+                # if d < 12 :
+                #     self.__t_last_detect = time.time()
+                #     self.get_logger().info(self.get_name() + " bot close to goal : " + str(d))
 
-                if self.__t_last_detect != None:
-                    if time.time() - self.__t_last_detect > 1.:
-                        self.__nb_balls += 1
-                        self.get_logger().info(self.get_name() + " got 1 ball !")
-                        self.get_logger().info(self.get_name() + " Nb of collected balls : " + str(self.__nb_balls))
+                # if self.__t_last_detect != None:
+                #     if time.time() - self.__t_last_detect > 1.:
+                #         self.__nb_balls += 1
+                #         self.get_logger().info(self.get_name() + " got 1 ball !")
+                #         self.get_logger().info(self.get_name() + " Nb of collected balls : " + str(self.__nb_balls))
                 self.move(x_target, y_target)
                 self.turn(angle)
         
         if self.__state == "come_back":
-            x_filet = 500.
+            x_filet = 640.
             self.__trigger.data = True
-            # if self.x < x_filet:
-            #     # left
-            #     self.move(x_base_left, y_base_left)
-            #     self.turn(math.atan2(y_base_left, x_base_left))
+            if len(self.__bases) == 8:
+                if self.__bases[0] < x_filet:
+                    x_base_left = self.__bases[0]
+                    y_base_left = self.__bases[1] 
+                    x_base_right =self.__bases[6]
+                    y_base_right = self.__bases[7]
+                    w_left, h_left = self.__bases[2], self.__bases[3]
+                    w_right, h_right = self.__bases[4], self.__bases[5]
+                else:
+                    x_base_right = self.__bases[2]
+                    y_base_right = self.__bases[3]
+                    x_base_left = self.__bases[4]
+                    y_base_left = self.__bases[5]
+                    w_right, h_right = self.__bases[0], self.__bases[1]
+                    w_left, h_left = self.__bases[6], self.__bases[7]
 
-            # else:
-            #     # right
-            #     self.move(x_base_right, y_base_right)
-            #     self.turn(math.atan2(y_base_right, x_base_right))
-        
+                if self.x < x_filet:
+                    # left
+                    # self.get_logger().info("Going Left : " + str(x_base_left < self.x <  w_left) + ", " + str(y_base_left < self.y <  h_left))
+                    mid_x, mid_y = (x_base_left + w_left)/2, (y_base_left + h_left)//2
+                    angle = math.atan2(self.y - mid_y, self.x - mid_x)
+                    self.move(mid_x, mid_y)
+                    self.turn(angle)
+                    if x_base_left < self.x <  w_left and y_base_left < self.y <  h_left:
+                        self.__home = True
+
+                else:
+                    # right
+                    # self.get_logger().info("Going Right")
+                    mid_x, mid_y = (x_base_right + w_right)/2, (y_base_right + h_right)//2
+                    angle = math.atan2(self.y - mid_y, self.x - mid_x)
+                    self.move(mid_x, mid_y)
+                    self.turn(angle)
+                    if x_base_right < self.x < x_base_right and y_base_right < self.y < y_base_right:
+                        self.__home = True
+
+
+        if self.__state == "home":
+            self.__trigger.data = False
+            self.__cmd_twist.linear.x = -3.0
+            if len(self.__bases) == 8:
+                for i in range(0, len(self.__bases), 4):
+                    x, y, w, h = self.__bases[i], self.__bases[i+1],self.__bases[i+2], self.__bases[i+3]
+                    if x < self.x <  w and y< self.y < h:
+                        self.__done = False
+                    else :
+                        self.__done = True
+
+            
         self.twist_pub.publish(self.__cmd_twist)
         # self.get_logger().info("Twist published : " + str(self.__cmd_twist.linear.x) + ", " + str(self.__cmd_twist.linear.y) + ", " + str(self.__cmd_twist.angular.z))
         # self.get_logger().info(self.get_name() + " Running")
-        # self.get_logger().info(self.get_name() + " : " + str(len(self.__balls)))
+        # self.get_logger().info(self.get_name() + " : " + str(len(self.__bases)))
 
 
 
