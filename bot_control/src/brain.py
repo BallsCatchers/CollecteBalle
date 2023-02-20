@@ -132,7 +132,7 @@ class Main(Node):
             #     self.turn(math.atan2(y_base_right, x_base_right))
         
         self.twist_pub.publish(self.__cmd_twist)
-        self.get_logger().info("Twist published : " + str(self.__cmd_twist.linear.x) + ", " + str(self.__cmd_twist.linear.y) + ", " + str(self.__cmd_twist.angular.z))
+        # self.get_logger().info("Twist published : " + str(self.__cmd_twist.linear.x) + ", " + str(self.__cmd_twist.linear.y) + ", " + str(self.__cmd_twist.angular.z))
         # self.get_logger().info(self.get_name() + " Running")
         # self.get_logger().info(self.get_name() + " : " + str(len(self.__balls)))
 
