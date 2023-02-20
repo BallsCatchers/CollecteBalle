@@ -33,7 +33,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclpy REQUIRED)
 
-# Installer les modules python custom comme roblib (dans le dossier $PROJECT_NAME 
+# Installer les modules python custom comme roblib (dans le dossier $PROJECT_NAME
 # ici package_template)
 # ament_python_install_package(${PROJECT_NAME})
 
@@ -67,7 +67,6 @@ ament_python_install_package(src)
 # Install Python executables
 install(PROGRAMS
   src/camera.py
-  src/cameraV2.py
   src/control_test.py
   src/arm_control.py
   DESTINATION lib/${PROJECT_NAME}
