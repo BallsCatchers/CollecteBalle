@@ -71,7 +71,7 @@ def generate_launch_description():
     # )
 
     spawn_entity = launch_ros.actions.Node( # fait spawn le robot
-    	package='gazebo_ros', 
+    	package='gazebo_ros',
     	executable='spawn_entity.py',
         arguments=['-entity', 'tennis_bot', '-x', '0', '-y', '6', '-z', '1', '-topic', 'robot_description'], # nom du robot
         output='screen'
@@ -102,7 +102,7 @@ def generate_launch_description():
         parameters=[{"use_sim_time": True}],
         output="screen",
         emulate_tty=True,
-        **{executable: "cameraV2.py"}
+        **{executable: "camera.py"}
     )
 
 
@@ -147,4 +147,3 @@ def generate_launch_description():
         camera_node
         # rviz_node
     ])
-

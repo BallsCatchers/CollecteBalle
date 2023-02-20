@@ -115,10 +115,11 @@ def detect_marker(img_RGB):
         position_x = (green_x + red_x)/2
         position_y = (green_y + red_y)/2
         orientation = math.atan2(green_y - red_y, green_x - red_x)
-        orientation = (- orientation + math.pi) % (2 * math.pi)
+        # orientation = (- orientation + math.pi) % (2 * math.pi)
         return True, position_x, position_y, orientation
 
     return False, None, None, None
+
 
 class Camera(Node):
 
@@ -129,153 +130,122 @@ class Camera(Node):
         self.publisher_base = self.create_publisher(Float64MultiArray, '/bases', 10)
         self.publisher_robot = self.create_publisher(Vector3, '/bot_pos', 10)
 
-        #TODO:
-        # Publish the ball to go fetch
+        self.publisher_goal = self.create_publisher(Vector3, '/ball_goal', 10)
+
 
         #Image
+        self.input_received = False
         self.image = []
-        self.get_logger().info(self.get_name() + " is launched")
-
         #Balls
         self.balls = []
+
+
+
+        timer_period = 0.1  # seconds
+        self.timer = self.create_timer(timer_period, self.process)
+        self.get_logger().info(self.get_name() + " is launched")
+
 
     def dist(self,x,y,ball):
         return np.sqrt((ball[1]-x)**2 + (ball[2]-y)**2)
 
+
     def image_callback(self, msg):
         try:
             self.image = bridge.imgmsg_to_cv2(msg, "bgr8")
+            self.input_received = True
+            # self.get_logger().info(self.get_name() + " got img")
+
+        except CvBridgeError:
+            self.get_logger().info(self.get_name() + " CvBridgeError !! Cannot convert img from ros msg to CV2 !")
+            pass
+
+
+    def process(self):
+        if self.input_received:
             balls = detect_yellow_balls(self.image)
-            ball_positions = []
-            new_balls = []
-            idx_to_remove = []
-            to_display = []
+            marker_detected, position_x, position_y, orientation = detect_marker(self.image)
+            base_detected, base = detect_base(self.image)
 
-            #Evite les doublons dans self.balls
-            unique_balls = set()
-            for i in range(len(self.balls)):
-                if self.balls[i][0] not in unique_balls:
-                    unique_balls.add(self.balls[i][0])
-                    # self.balls[i] = self.balls[i]
-                else:
-                    self.balls.pop(i)
+            ball_positions, base_positions, robot_position = [], [], []
 
-            #On cherche les nouvelles balles et on les ajoute
+            # self.get_logger().info("\n=========================\n")
+            # self.get_logger().info("Found " + str(len(balls)) + " balls in img")
+
+            # self.balls = n_balls * [detection_time t0, pos_x, pos_y, updated (bool)]
+
+
+            # Reset the update state of each balls
+            for i in self.balls:
+                i[3] = False
+
+            # For each detected ball:
             for i in range(len(balls)):
                 x, y, radius, area = balls[i][0], balls[i][1], balls[i][2], balls[i][3]
 
-                #Affichage
+                #Publication
                 ball_positions.append(x)
                 ball_positions.append(y)
 
-                # Check if this is a new ball
-                if len(self.balls) < len(balls):
-                    print("adding new ball..")
-                    d_min = np.inf
-                    for j in range(len(self.balls)):
-                        d = np.sqrt((self.balls[j][1]-x)**2 + (self.balls[j][2]-y)**2)
-                        if d < d_min:
-                            d_min = d
-                    if d_min > 1:
-                        print("new ball added !")
-                        self.balls.append([time.time(), x, y, radius])
-                    else:
-                        print("fail to add the ball, d_min ", d_min)
+                # Reset of min values
+                d_min = np.inf
+                index_j = None
+
+                for j in range(len(self.balls)):
+                    d = np.sqrt((self.balls[j][1]-x)**2 + (self.balls[j][2]-y)**2)
+                    if d < d_min:
+                        d_min = d # Finding the minimal distance for matching
+                        index_j = j # Getting the corresponding index in the already found list if it exist
+                # self.get_logger().info("Params : d_min :" + str(d_min) + ", index of closest : " + str(index_j))
+                if d_min > 3:
+                    # self.get_logger().info("new ball added ! Pos : " + str(x) + ", " + str(y))
+                    self.balls.append([time.time(), x, y, True])
+                else:
+                    # Update the corresponding ball in the self.balls list
+                    # self.get_logger().info("Updated ball nb " + str(index_j))
+                    self.balls[index_j][1] = x
+                    self.balls[index_j][2] = y
+                    self.balls[index_j][3] = True
+                # else:
+                #     print("fail to add the ball, d_min  : ", d_min, ', and pos : ', x, y)
+
+            # Removing all the unupdated balls
+            n_balls = [self.balls[i] for i in range(len(self.balls)) if self.balls[i][3]]
+            self.balls = n_balls
+            # self.get_logger().info(" length of new balls : " + str(len(n_balls)))
 
 
-            # Find closest ball in self.balls
-            # if len(balls) == len(self.balls): #Si il a bien détecter toutes les balles
-            #     for i in range(len(self.balls)-1,-1,-1):
-            #         d_min = np.inf
-            #         xmin = 0; ymin = 0; rmin = 0;
-            #         for j in range(len(balls)):
-            #             x, y, radius, area = balls[j][0], balls[j][1], balls[j][2], balls[j][3]
-            #             d = np.sqrt((self.balls[i][1]-x)**2 + (self.balls[i][2]-y)**2)
-            #             if d < d_min:
-            #                 d_min = d
-            #                 xmin = x; ymin = y; rmin = radius
-            #         # if d_min < 50:
-            #         to_display.append([i, xmin, ymin, rmin])
-            #         # else:
-            #         #     idx_to_remove.append(i)
-
-            # else:
-            #     print("List doesn't have the same lenghts")
-
-
-            for i in range(len(to_display)):
-                idx_i = to_display[i][0]; x_i = to_display[i][1]; y_i = to_display[i][2]
-                for j in range(i+1,len(to_display)):
-                    idx_j = to_display[j][0]; x_j = to_display[j][1]; y_j = to_display[j][2]
-                    if x_i == x_j and y_i == y_j:
-                        print("superposition")
-                        if self.balls[idx_i][0] > self.balls[idx_j][0]:
-                            if idx_j not in idx_to_remove:
-                                idx_to_remove.append(idx_j)
-                        else:
-                            if idx_i not in idx_to_remove:
-                                idx_to_remove.append(idx_i)
-
-            for i in range(len(to_display)):
-                if i not in idx_to_remove:
-                    idx_to_display = to_display[i][0]
-                    xmin = to_display[i][1]
-                    ymin = to_display[i][2]
-                    rmin = to_display[i][3]
-                    self.balls[idx_to_display] = [self.balls[idx_to_display][0], xmin, ymin, rmin]
-
-            # Remove balls that were not updated
-            for i in idx_to_remove:
-                self.balls.pop(i)
-                print("indice to remove: ",i)
-
-
-            #Affichage
-            for j in range(len(balls)):
-                x, y, radius, area = balls[j][0], balls[j][1], balls[j][2], balls[j][3]
-                cv2.circle(self.image, (int(x), int(y)), int(radius), (0, 0, 255), -1)
-                cv2.rectangle(self.image, (int(x) - 5, int(y) - 5), (int(x) + 5, int(y) + 5), (0, 128, 255), -1)
-
+            # #Affichage
             for i in range(len(self.balls)):
                 t = self.balls[i][0]
                 x = self.balls[i][1]
                 y = self.balls[i][2]
-                radius = self.balls[i][3]
+                radius = 4.
 
-                cv2.putText(self.image, "Ball " + str(i), (int(x-radius), int(y-radius)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.putText(self.image, "Time: " + str(time.time()-self.balls[i][0]), (int(x-radius), int(y-radius+15)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-
-            """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-            base_detected, base = detect_base(self.image)
-            base_positions = []
+                cv2.circle(self.image, (int(x), int(y)), int(radius), (0, 0, 255), -1)
+                cv2.putText(self.image, "Ball " + str(i+1), (int(x-radius-20), int(y-radius-20)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                cv2.putText(self.image, "Time: " + time.strftime('%Mmin %Ss', time.gmtime(time.time()-self.balls[i][0])), (int(x-radius-20), int(y-radius-20+15)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             if base_detected:
                 for x, y, w, h in base:
                     # self.get_logger().info(f"\nBase detected at: (x,y) = ({x},{y}) with size (w,h) = ({w},{h})\n")
-
                     cv2.rectangle(self.image,(int(x),int(y)),(int(x)+int(w),int(y)+int(h)),(255,0,0),2)
-
                      # Add the x and y coordinates of each ball to the ball_positions list
                     base_positions.append(x * 1.0)
                     base_positions.append(y * 1.0)
 
 
-            marker_detected, position_x, position_y, orientation = detect_marker(self.image)
-            robot_position = []
             if marker_detected:
-                # self.get_logger().info(f"\Robot detected at: (x,y, theta) = ({position_x},{position_y},{orientation}")
-                # self.get_logger().info(f"\nx : {position_x}\n")
-                # self.get_logger().info(f"\ny : {position_y}\n")
-                # self.get_logger().info(f"\nOrientation : {orientation*180./math.pi}\n")
+                # self.get_logger().info(f"\Robot detected at: (x,y, theta) = ({position_x},{position_y},{orientation*180./math.pi}")
                 robot_position = [position_x, position_y, orientation]
                 cv2.rectangle(self.image,(int(position_x)-2,int(position_y)-2),(int(position_x)+2,int(position_y)+2),(255,0,0),2)
-            self.image_publisher(ball_positions, base_positions, robot_position)
 
+
+
+            self.image_publisher(ball_positions, base_positions, robot_position)
             cv2.imshow("Image window", self.image)
             cv2.waitKey(1)  # it will prevent the window from freezing
+            self.input_received = False
 
-        except CvBridgeError as e:
-            self.get_logger().error(self.get_name() + ": Cannot convert message " + str(e))
 
     def image_publisher(self, ball_positions, base_positions, robot_position):
         if ball_positions != []:
@@ -284,6 +254,12 @@ class Camera(Node):
             msg_balls.data = ball_positions
             # Publish the message
             self.publisher_balls.publish(msg_balls)
+
+            goal_ball = Vector3()
+            oldest_ball = self.balls[0]
+            goal_ball.x = oldest_ball[1]
+            goal_ball.y = oldest_ball[2]
+            self.publisher_goal.publish(goal_ball)
 
         if base_positions != []:
             # Create the Float64MultiArray message for the base
