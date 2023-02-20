@@ -51,6 +51,8 @@ class Main(Node):
         self.__chrono = time.time()
 
 
+        self.__t_last_detect = None
+        self.__nb_balls = 0
         self.__home = False
 
         self.x = 0.
@@ -84,9 +86,9 @@ class Main(Node):
         err_x = (dx - self.x)
         err_y = (dy - self.y)
         d = err_x ** 2 + err_y ** 2
-        v_x = float(max(min(self.K1 * d, 1.2), 0.6))
+        v_x = float(max(min(self.K1 * d, 1.6), 0.6))
         self.__cmd_twist.linear.x = v_x
-        if v_x > 0.8:
+        if v_x > 0.75:
             self.__trigger.data = True
         else:
             self.__trigger.data = False
@@ -100,7 +102,9 @@ class Main(Node):
     def process(self):
 
         chrono = time.time() - self.__chrono
-        if chrono >= 60.*4 and self.__state == "get_balls":
+
+
+        if chrono >= 60.*2 and self.__state == "get_balls":
             self.__state = "come_back"
             self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
 
@@ -120,7 +124,16 @@ class Main(Node):
                 angle = math.atan2(self.y - y_target, self.x - x_target)
                 # print("Angle : ", angle*180./np.pi)
                 # print("Bot : ", self.theta*180./np.pi)
-                if ((x_target - self.x)**2 + (y_target - self.y)**2)
+                d = np.sqrt((x_target - self.x)**2 + (y_target - self.y)**2)
+                if d < 12 :
+                    self.__t_last_detect = time.time()
+                    self.get_logger().info(self.get_name() + " bot close to goal : " + str(d))
+
+                if self.__t_last_detect != None:
+                    if time.time() - self.__t_last_detect > 1.:
+                        self.__nb_balls += 1
+                        self.get_logger().info(self.get_name() + " got 1 ball !")
+                        self.get_logger().info(self.get_name() + " Nb of collected balls : " + str(self.__nb_balls))
                 self.move(x_target, y_target)
                 self.turn(angle)
         
