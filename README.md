@@ -2,8 +2,8 @@
 ## (A)utonomous (G)atherer for (A)dvanced (T)ennis (E)xercise
 
 ![logo](/images/324945165_2118673848323594_5974956229308836638_n.gif)
-## Lancer la simulation
-### Dépendences
+
+## Dépendences
 Install ros2 foxy from website: [ROS](https://docs.ros.org/en/foxy/Installation.html)
 
 Ros2 control library :
@@ -11,14 +11,14 @@ Ros2 control library :
 sudo apt install ros-foxy-ros2-control
 sudo apt install ros-foxy-ros2-controllers
 ```
+
+### Test
 If you have an error saying :
-```
-could not connect to service
-```
+`could not connect to service`
+
 when launching 
-```
-ros2 launch tennis_bot_description spawner.launch.py
-```
+`ros2 launch tennis_bot_description spawner.launch.py`
+
 Please install the demo package of [gazebo_ros2_control_demos](https://github.com/ros-controls/gazebo_ros2_control) in your ros2 workspace, and run :
 
 ```
@@ -30,6 +30,7 @@ colcon build --packages-select gazebo_ros2_control
 ```
 And re-run.
 
+## Launch simulation
 ### Launch AGATE only
 
 ```
