@@ -1,0 +1,478 @@
+<?xml version="1.0"?>
+<robot name="tennis_bot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Define robot constants -->
+  <xacro:property name="base_width" value="0.36"/>
+  <xacro:property name="base_length" value="0.40"/>
+  <xacro:property name="base_height" value="0.02"/>
+
+  <xacro:property name="wall_height" value="0.15"/>
+  <xacro:property name="wall_zoff" value="0.08"/>
+
+  <xacro:property name="wheel_radius" value="0.08"/>
+  <xacro:property name="wheel_width" value="0.04"/>
+  <xacro:property name="wheel_ygap" value="0.025"/>
+  <xacro:property name="wheel_zoff" value="0.08"/>
+  <xacro:property name="wheel_xoff" value="0.12"/>
+
+  <xacro:property name="arm_width" value="0.12"/>
+  <xacro:property name="arm_length" value="0.20"/>
+  <xacro:property name="arm_height" value="0.02"/>
+  <xacro:property name="arm_ygap" value="-0.01"/>
+  <xacro:property name="arm_zoff" value="0.10"/>
+  <xacro:property name="arm_xoff" value="-0.21"/>
+
+  <!-- <xacro:export_env name="WHEEL_DIAMETER" value="${2*wheel_radius}"/> -->
+
+  <!-- Define intertial property macros  -->
+  <xacro:macro name="box_inertia" params="m w h d">
+    <inertial>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}"/>
+      <mass value="${m}"/>
+      <inertia ixx="${(m/12) * (h*h + d*d)}" ixy="0.0" ixz="0.0" iyy="${(m/12) * (w*w + d*d)}" iyz="0.0" izz="${(m/12) * (w*w + h*h)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertial>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
+      <mass value="${m}"/>
+      <inertia ixx="${(m/12) * (3*r*r + h*h)}" ixy = "0" ixz = "0" iyy="${(m/12) * (3*r*r + h*h)}" iyz = "0" izz="${(m/2) * (r*r)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="sphere_inertia" params="m r">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${(2/5) * m * (r*r)}" ixy="0.0" ixz="0.0" iyy="${(2/5) * m * (r*r)}" iyz="0.0" izz="${(2/5) * m * (r*r)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- Robot Base -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${base_length} ${base_width} ${base_height}"/>
+      </geometry>
+      <material name="Red">
+        <color rgba="0 0.9 0.9 1"/>
+      </material>
+    </visual>
+    
+    <collision>
+      <geometry>
+        <box size="${base_length} ${base_width} ${base_height}"/>
+      </geometry>
+    </collision>
+
+    <xacro:box_inertia m="5" w="${base_width}" d="${base_length}" h="${base_height}"/>
+  </link>
+
+<!-- Walls -->
+
+  <link name="back_link">
+    <visual>
+      <geometry>
+        <box size="${base_width} ${base_height} ${wall_height}"/>
+      </geometry>
+      <material name="Red">
+        <color rgba="0 0.9 0.9 1"/>
+      </material>
+    </visual>
+    
+    <collision>
+      <geometry>
+        <box size="${base_width} ${base_height} ${wall_height}"/>
+      </geometry>
+    </collision>
+
+    <xacro:box_inertia m="5" w="${base_width}" d="${base_height}" h="${wall_height}"/>
+  </link>
+
+  <joint name="back_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="back_link"/>
+    <origin xyz="${-(base_width+base_height)/2} 0.0 ${-wall_zoff}" rpy="0 0 ${pi/2}"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <xacro:macro name="wall" params="prefix y_reflect">
+    <link name="${prefix}_link">
+      <visual>
+        <geometry>
+          <box size="${base_length} ${base_height} ${wall_height}"/>
+        </geometry>
+        <material name="Red">
+          <color rgba="0 0.9 0.9 1"/>
+        </material>
+      </visual>
+      
+      <collision>
+        <geometry>
+          <box size="${base_length} ${base_height} ${wall_height}"/>
+        </geometry>
+      </collision>
+
+      <xacro:box_inertia m="5" w="${base_length}" d="${base_height}" h="${wall_height}"/>
+    </link>
+
+    <joint name="${prefix}_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${prefix}_link"/>
+      <origin xyz="0.0 ${-y_reflect*(base_length)/2+y_reflect*base_height*1.5} ${-wall_zoff}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:wall prefix="wall_r" y_reflect="1" />
+  <xacro:wall prefix="wall_l" y_reflect="-1" />
+
+  <link name="base_top_link_red">
+    <visual>
+      <geometry>
+        <box size="${(base_length-0.04)/2} ${base_width-0.04} 0.02"/>
+      </geometry>
+      <material name="Red">
+        <color rgba="0 0.9 0.9 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="${(base_length-0.04)/2} ${base_width-0.04} 0.02"/>
+      </geometry>
+    </collision>
+
+    <xacro:box_inertia m="0.5" w="${(base_length-0.04)/2}" d="${base_width-0.04}" h="0.02"/>
+  </link>
+
+  <joint name="base_top_joint_red" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_top_link_red"/>
+    <origin xyz="${(base_length-0.04)/4} 0.0 ${base_height/2}" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="base_top_link_red">
+    <material>Gazebo/Red</material>
+  </gazebo>
+
+  <link name="base_top_link_green">
+    <visual>
+      <geometry>
+        <box size="${(base_length-0.04)/2} ${base_width-0.04} 0.02"/>
+      </geometry>
+      <material name="Red">
+        <color rgba="0 0.9 0.9 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="${(base_length-0.04)/2} ${base_width-0.04} 0.02"/>
+      </geometry>
+    </collision>
+
+    <xacro:box_inertia m="0.5" w="${(base_length-0.04)/2}" d="${base_width-0.04}" h="0.02"/>
+  </link>
+
+  <joint name="base_top_joint_green" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_top_link_green"/>
+    <origin xyz="${-(base_length-0.04)/4} 0.0 ${base_height/2}" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="base_top_link_green">
+    <material>Gazebo/Green</material>
+  </gazebo>
+
+  <!-- Robot Footprint -->
+  <link name="base_footprint"/>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_footprint"/>
+    <origin xyz="0.0 0.0 ${-(wheel_radius+wheel_zoff)}" rpy="0 0 0"/>
+  </joint>
+  	
+  <!-- Wheels -->
+  <xacro:macro name="wheel" params="prefix x_reflect y_reflect">
+    <link name="${prefix}_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+            <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="White">
+          <color rgba="0.9 0.9 0.9 1"/>
+        </material>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+
+      <xacro:cylinder_inertia m="0.5" r="${wheel_radius}" h="${wheel_width}"/>
+
+    </link>
+
+    <joint name="${prefix}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_link"/>
+      <origin xyz="${x_reflect*wheel_xoff} ${y_reflect*(base_width/2+wheel_ygap)} ${-wheel_zoff}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:wheel prefix="drivewhl_b_l" x_reflect="-1" y_reflect="1" />
+  <xacro:wheel prefix="drivewhl_b_r" x_reflect="-1" y_reflect="-1" />
+  <xacro:wheel prefix="drivewhl_f_l" x_reflect="1" y_reflect="1" />
+  <xacro:wheel prefix="drivewhl_f_r" x_reflect="1" y_reflect="-1" />
+  
+  <!--Robot arms -->
+  <xacro:macro name="arm" params="prefix x_reflect y_reflect orientation">
+    <link name="${prefix}_link">
+      <visual>
+        <origin xyz="0.10 0 0.02" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <box size="${arm_length} ${arm_width} ${arm_height}"/>
+        </geometry>
+        <material name="White">
+          <color rgba="0.9 0.9 0.9 1"/>
+        </material>
+      </visual>
+      
+      <collision>
+        <origin xyz="0.10 0 0.02" rpy="${pi/2} 0 0"/>
+        <geometry>
+            <box size="${arm_length} ${arm_width} ${arm_height}"/>
+        </geometry>
+      </collision>
+      
+      <xacro:box_inertia m="1" w="${arm_width}" d="${arm_length}" h="${arm_height}"/>
+    </link>
+    
+    <joint name="${prefix}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_link"/>
+      <origin xyz="${x_reflect*arm_xoff} ${y_reflect*(base_width/2+arm_ygap)} ${-arm_zoff}" rpy="0 0 ${orientation}"/>
+      <axis xyz="0 0 1"/>
+    </joint>
+  </xacro:macro>
+  
+  <xacro:arm prefix="arm_l" x_reflect="-1" y_reflect="1" orientation="1"/>
+  <xacro:arm prefix="arm_r" x_reflect="-1" y_reflect="-1" orientation="-1"/>
+
+  <gazebo reference="arm_l_link">
+      <material>Gazebo/Gray</material>
+      <dampingFactor>0.0002</dampingFactor>
+      <collision>
+          <surface>
+              <bounce>
+                  <restitution_coefficient>0.8</restitution_coefficient>
+                  <threshold>0.01</threshold>
+              </bounce>
+              <contact>
+                  <ode>
+                      <max_vel>10</max_vel>
+                  </ode>
+              </contact>
+              <friction>
+                  <torsional>
+                      <coefficient>0.01</coefficient>
+                      <surface_radius>0.1</surface_radius>
+                      <use_patch_radius>false</use_patch_radius>
+                  </torsional>
+              </friction>
+          </surface>
+      </collision>
+      <mu1>100.0</mu1>
+      <mu2>100.0</mu2>
+      <kp>500000</kp>
+      <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <gazebo reference="drivewhl_f_l_link">
+      <material>Gazebo/Gray</material>
+      <dampingFactor>0.0002</dampingFactor>
+      <collision>
+          <surface>
+              <bounce>
+                  <restitution_coefficient>0.8</restitution_coefficient>
+                  <threshold>0.01</threshold>
+              </bounce>
+              <contact>
+                  <ode>
+                      <max_vel>10</max_vel>
+                  </ode>
+              </contact>
+              <friction>
+                  <torsional>
+                      <coefficient>0.01</coefficient>
+                      <surface_radius>0.1</surface_radius>
+                      <use_patch_radius>false</use_patch_radius>
+                  </torsional>
+              </friction>
+          </surface>
+      </collision>
+      <mu1>100.0</mu1>
+      <mu2>100.0</mu2>
+      <kp>500000</kp>
+      <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <!-- Rounded Shapes -->
+  <!-- <xacro:macro name="cylinders" params ="prefix radius length parent y_orientation z_orientation x_pos y_pos z_pos">
+    <link name="${prefix}_link">
+      <visual>
+        <geometry>
+          <cylinder radius="${radius}" length="${length}"/>
+        </geometry>
+        <material name="White">
+          <color rgba="0.9 0.9 0.9 1"/>
+        </material>
+      </visual>
+      
+      <collision>
+        <geometry>
+          <cylinder radius="${radius}" length="${length}"/>
+        </geometry>
+      </collision>
+
+      <xacro:cylinder_inertia m="0.2" r="${radius}" h="${length}"/>
+
+    </link>
+  
+    <joint name="${prefix}_joint" type="fixed">
+      <parent link="${parent}_link"/>
+      <child link="${prefix}_link"/>
+      <origin xyz="${x_pos} ${y_pos} ${z_pos}" rpy="0 ${y_orientation} ${z_orientation}"/>
+    </joint>  
+  </xacro:macro>
+
+  <xacro:cylinders prefix="cylinder_1" radius="${arm_height/2}" length="${arm_width}" parent="arm_l" y_orientation="0" z_orientation="0" x_pos="0.2" y_pos="0" z_pos="0.02"/>
+  <xacro:cylinders prefix="cylinder_2" radius="${arm_height/2}" length="${arm_width}" parent="arm_r" y_orientation="0" z_orientation="0" x_pos="0.2" y_pos="0" z_pos="0.02"/>
+  <xacro:cylinders prefix="cylinder_base_l" radius="0.02" length="${base_length-0.04}" parent="base" y_orientation="${pi/2}" z_orientation="0" x_pos="0" y_pos="${(base_width-0.04)/2}" z_pos="0.07"/>
+  <xacro:cylinders prefix="cylinder_base_r" radius="0.02" length="${base_length-0.04}" parent="base" y_orientation="${pi/2}" z_orientation="0" x_pos="0" y_pos="${-(base_width-0.04)/2}" z_pos="0.07"/>
+  <xacro:cylinders prefix="cylinder_base_f" radius="0.02" length="${base_width-0.04}" parent="base" y_orientation="${pi/2}" z_orientation="${pi/2}" x_pos="${(base_length-0.04)/2}" y_pos="0" z_pos="0.07"/>
+  <xacro:cylinders prefix="cylinder_base_b" radius="0.02" length="${base_width-0.04}" parent="base" y_orientation="${pi/2}" z_orientation="${pi/2}" x_pos="${-(base_length-0.04)/2}" y_pos="0" z_pos="0.07"/>
+
+  <xacro:macro name="spheres" params ="prefix radius parent x_pos y_pos z_pos">
+    <link name="${prefix}_link">
+      <visual>
+        <geometry>
+          <sphere radius="${radius}"/>
+        </geometry>
+        <material name="White">
+          <color rgba="0.9 0.9 0.9 1"/>
+        </material>
+      </visual>
+      
+      <collision>
+        <geometry>
+          <sphere radius="${radius}"/>
+        </geometry>
+      </collision>
+
+      <xacro:sphere_inertia m="0.05" r="${radius}"/>
+
+    </link>
+  
+    <joint name="${prefix}_joint" type="fixed">
+      <parent link="${parent}_link"/>
+      <child link="${prefix}_link"/>
+      <origin xyz="${x_pos} ${y_pos} ${z_pos}" rpy="0 0 0"/>
+    </joint>  
+  </xacro:macro>
+
+  <xacro:spheres prefix="sphere_l_f" radius="0.02" parent="base" x_pos="${(base_length-0.04)/2}" y_pos="${(base_width-0.04)/2}" z_pos="0.07" />
+  <xacro:spheres prefix="sphere_l_b" radius="0.02" parent="base" x_pos="${(base_length-0.04)/2}" y_pos="${-(base_width-0.04)/2}" z_pos="0.07" />
+  <xacro:spheres prefix="sphere_r_f" radius="0.02" parent="base" x_pos="${-(base_length-0.04)/2}" y_pos="${(base_width-0.04)/2}" z_pos="0.07" />
+  <xacro:spheres prefix="sphere_r_b" radius="0.02" parent="base" x_pos="${-(base_length-0.04)/2}" y_pos="${-(base_width-0.04)/2}" z_pos="0.07" /> -->
+
+
+<!-- For joint control -->
+<ros2_control name="GazeboSystem" type="system">
+  <hardware>
+    <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+  </hardware>
+  <joint name="arm_l_joint">
+    <command_interface name="position">
+      <param name="min">-100</param>
+      <param name="max">100</param>
+    </command_interface>
+    <state_interface name="position">
+      <param name="initial_value">1.0</param>
+    </state_interface>
+    <state_interface name="velocity"/>
+    <state_interface name="effort"/>
+  </joint>
+  <joint name="arm_r_joint">
+    <command_interface name="position">
+      <param name="min">-100</param>
+      <param name="max">100</param>
+    </command_interface>
+    <state_interface name="position">
+      <param name="initial_value">1.0</param>
+    </state_interface>
+    <state_interface name="velocity"/>
+    <state_interface name="effort"/>
+  </joint>
+</ros2_control>
+
+
+
+  <!-- Wheel Controllers -->
+  <gazebo>
+
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <parameters>$(find tennis_bot_description)/config/arm_control.yaml</parameters>
+    </plugin>
+
+    <!-- Front wheels -->
+    <plugin name="front_wheel_controller" filename="libgazebo_ros_diff_drive.so">
+      <!--<ros>
+        <namespace>/gzbo</namespace>
+        <remapping>cmd_vel:=cmd_twist_front</remapping>
+      </ros> -->
+
+      <left_joint>drivewhl_f_l_joint</left_joint>
+      <right_joint>drivewhl_f_r_joint</right_joint>
+
+      <wheel_separation>0.2</wheel_separation>
+      <wheel_diameter>0.2</wheel_diameter>
+
+      <!-- limits -->
+      <max_wheel_torque>20</max_wheel_torque>
+      <max_wheel_acceleration>1.0</max_wheel_acceleration>
+
+      <!-- output -->
+      <publish_odom>true</publish_odom>
+      <robot_base_frame>base_link</robot_base_frame>
+    </plugin>
+
+    <!-- Back wheels -->
+    <plugin name="back_wheel_controller" filename="libgazebo_ros_diff_drive.so">
+      <!--<ros>
+        <namespace>/gzbo</namespace>
+        <remapping>cmd_vel:=cmd_twist</remapping>
+      </ros> -->
+
+      <left_joint>drivewhl_b_l_joint</left_joint>
+      <right_joint>drivewhl_b_r_joint</right_joint>
+
+      <wheel_separation>0.2</wheel_separation>
+      <wheel_diameter>0.2</wheel_diameter>
+      <!-- limits -->
+      <max_wheel_torque>20</max_wheel_torque>
+      <max_wheel_acceleration>1.0</max_wheel_acceleration>
+
+      <!-- output -->
+      <publish_odom>true</publish_odom>
+      <robot_base_frame>base_link</robot_base_frame>
+    </plugin>
+
+</gazebo>
+</robot>

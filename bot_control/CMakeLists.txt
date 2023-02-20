@@ -70,6 +70,7 @@ install(PROGRAMS
   src/cameraV2.py
   src/control_test.py
   src/arm_control.py
+  src/joy_to_gazebo.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
