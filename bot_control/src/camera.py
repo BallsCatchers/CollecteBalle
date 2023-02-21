@@ -125,8 +125,6 @@ def detect_net(img_RGB):
     # Obtenir la taille de l'image
     hauteur, largeur, _ = img_RGB.shape
 
-    print(f"hauteur = {hauteur}; largeur = {largeur}")
-
     # Définir les coordonnées du rectangle du filet
     x_min = int(largeur / 2 - largeur * 0.005)
     x_max = int(largeur / 2 + largeur * 0.005)
