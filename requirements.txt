@@ -1,2 +1,2 @@
-sudo apt install ros-foxy-ros2-control
-sudo apt install ros-foxy-ros2-controllers
+# apt install ros-foxy-ros2-control
+# apt install ros-foxy-ros2-controllers
