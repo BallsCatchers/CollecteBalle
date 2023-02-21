@@ -16,6 +16,7 @@ PO: Simon Gervaise
 
 - Création de joint sous ROS2 pour contrôler les bras et les roues
 - Implémentation d'un algorithme de suivi de balle sous Gazebo
+- Rendre le robot plus dynamique par contrôle avec la manette
 
 ### Refonte du design du robot
 
@@ -25,7 +26,7 @@ PO: Simon Gervaise
 ### Détection de balles
 
 - Supprimer les balles lorsqu'elles ont atteint la zone de dépot
-- Créer un nouel état pour les balles capturées par le robot mais pas encore déposées dans la zone de dépôt
+- Créer un nouvel état pour les balles capturées par le robot mais pas encore déposées dans la zone de dépôt
 
 
 ## Challenges techniques
