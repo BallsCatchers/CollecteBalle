@@ -97,7 +97,7 @@
     <axis xyz="0 1 0"/>
   </joint>
 
-<!--   <xacro:macro name="flame_base" params ="prefix radius">
+  <xacro:macro name="flame_base" params ="prefix radius offset">
     <link name="${prefix}_link">
       <visual>
         <geometry>
@@ -117,12 +117,159 @@
     <joint name="${prefix}_joint" type="fixed">
       <parent link="base_link"/>
       <child link="${prefix}_link"/>
-      <origin xyz ="${-base_width/2 - wall_height} 0.0 ${-wall_zoff}" rpy = "0 ${pi/2} 0"/>
+      <origin xyz ="${-base_width/2 - base_height - offset} 0.0 ${-wall_zoff + radius - wall_height/2}" rpy = "0 ${pi/2} 0"/>
       <axis xyz ="0 1 0"/>
     </joint>
   </xacro:macro>
 
-  <xacro:flame_base prefix="red_flame" radius="0.06"/> -->
+  <xacro:flame_base prefix="red_flame" radius="0.05" offset = "0.001"/>
+  <xacro:flame_base prefix="orange_flame" radius="0.06" offset = "0.0"/>
+  <xacro:flame_base prefix="white_flame" radius="0.025" offset = "0.002"/>
+
+  <gazebo reference="red_flame_link">
+    <material>Gazebo/Red</material>
+    <dampingFactor>0.0002</dampingFactor>
+    <collision>
+        <surface>
+            <bounce>
+                <restitution_coefficient>0.8</restitution_coefficient>
+                <threshold>0.01</threshold>
+            </bounce>
+            <contact>
+                <ode>
+                    <max_vel>10</max_vel>
+                </ode>
+            </contact>
+            <friction>
+                <torsional>
+                    <coefficient>0.01</coefficient>
+                    <surface_radius>0.1</surface_radius>
+                    <use_patch_radius>false</use_patch_radius>
+                </torsional>
+            </friction>
+        </surface>
+    </collision>
+    <mu1>100.0</mu1>
+    <mu2>100.0</mu2>
+    <kp>500000</kp>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <gazebo reference="orange_flame_link">
+    <material>Gazebo/Orange</material>
+    <dampingFactor>0.0002</dampingFactor>
+    <collision>
+        <surface>
+            <bounce>
+                <restitution_coefficient>0.8</restitution_coefficient>
+                <threshold>0.01</threshold>
+            </bounce>
+            <contact>
+                <ode>
+                    <max_vel>10</max_vel>
+                </ode>
+            </contact>
+            <friction>
+                <torsional>
+                    <coefficient>0.01</coefficient>
+                    <surface_radius>0.1</surface_radius>
+                    <use_patch_radius>false</use_patch_radius>
+                </torsional>
+            </friction>
+        </surface>
+    </collision>
+    <mu1>100.0</mu1>
+    <mu2>100.0</mu2>
+    <kp>500000</kp>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <xacro:macro name="flame_top" params ="prefix flame_size radius offset">
+    <link name="${prefix}_top_link">
+      <visual>
+        <geometry>
+          <box size = "${flame_size} ${flame_size} 0.01"/>
+        </geometry>
+      </visual>
+
+      <collision>
+        <geometry>
+          <box size = "${flame_size} ${flame_size} 0.01"/>
+        </geometry>
+      </collision>
+
+    <xacro:box_inertia m="5" w="${flame_size}" d="${flame_size}" h="0.01"/>
+    </link>
+
+    <joint name="${prefix}_top_joint" type="fixed">
+      <parent link="${prefix}_link"/>
+      <child link="${prefix}_top_link"/>
+      <origin xyz ="${-sqrt(radius*radius - flame_size*flame_size/2)} 0.0 0.0" rpy = "0 0 ${pi/4}"/>
+      <axis xyz ="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:flame_top prefix="white_flame" flame_size="0.03" radius="0.025" offset = "0.002"/>
+  <xacro:flame_top prefix="red_flame" flame_size="0.06" radius="0.05" offset = "0.001"/>
+  <xacro:flame_top prefix="orange_flame" flame_size="0.07" radius="0.06" offset = "0.002"/>
+
+  <gazebo reference="orange_flame_top_link">
+    <material>Gazebo/Orange</material>
+    <dampingFactor>0.0002</dampingFactor>
+    <collision>
+        <surface>
+            <bounce>
+                <restitution_coefficient>0.8</restitution_coefficient>
+                <threshold>0.01</threshold>
+            </bounce>
+            <contact>
+                <ode>
+                    <max_vel>10</max_vel>
+                </ode>
+            </contact>
+            <friction>
+                <torsional>
+                    <coefficient>0.01</coefficient>
+                    <surface_radius>0.1</surface_radius>
+                    <use_patch_radius>false</use_patch_radius>
+                </torsional>
+            </friction>
+        </surface>
+    </collision>
+    <mu1>100.0</mu1>
+    <mu2>100.0</mu2>
+    <kp>500000</kp>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <gazebo reference="red_flame_top_link">
+    <material>Gazebo/Red</material>
+    <dampingFactor>0.0002</dampingFactor>
+    <collision>
+        <surface>
+            <bounce>
+                <restitution_coefficient>0.8</restitution_coefficient>
+                <threshold>0.01</threshold>
+            </bounce>
+            <contact>
+                <ode>
+                    <max_vel>10</max_vel>
+                </ode>
+            </contact>
+            <friction>
+                <torsional>
+                    <coefficient>0.01</coefficient>
+                    <surface_radius>0.1</surface_radius>
+                    <use_patch_radius>false</use_patch_radius>
+                </torsional>
+            </friction>
+        </surface>
+    </collision>
+    <mu1>100.0</mu1>
+    <mu2>100.0</mu2>
+    <kp>500000</kp>
+    <minDepth>0.001</minDepth>
+  </gazebo>
 
   <xacro:macro name="wall" params="prefix y_reflect">
     <link name="${prefix}_link">
