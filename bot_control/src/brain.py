@@ -76,7 +76,8 @@ class Main(Node):
 
     def sub_bases(self, msg):
         # self.get_logger().info(self.get_name() + " got bases")
-        self.__bases = msg.data
+        if len(msg.data) == 8:
+            self.__bases = msg.data
         # self.get_logger().info("Going home : " + str(len(self.__bases)) + ", first element : " + str(self.__bases[0]))
 
 
@@ -121,7 +122,7 @@ class Main(Node):
             v = np.sqrt((self.__last_pose[0] - self.x)**2 + (self.__last_pose[1] - self.y)**2)/ 0.1
             dtheta = self.__last_pose[2] - self.theta
             v += dtheta
-            self.get_logger().info(self.get_name() + " Current speed is : " + str(v) + " and cmd is " + str(self.__cmd_twist.linear.x))
+            # self.get_logger().info(self.get_name() + " Current speed is : " + str(v) + " and cmd is " + str(self.__cmd_twist.linear.x))
             if v == 0. and self.__cmd_twist.linear.x > 0 and (time.time() - self.__cooldown) > 10.:
                 return True
 
@@ -138,6 +139,7 @@ class Main(Node):
     def process(self):
 
         chrono = time.time() - self.__chrono
+        x_filet = 640.
 
         stuck = self.check_stuck()
 
@@ -146,6 +148,23 @@ class Main(Node):
             self.__wait_lock = True
         else:
             self.__wait_lock = False
+
+
+        if len(self.__bases) == 8:
+            if self.__bases[0] < x_filet:
+                x_base_left = self.__bases[0]
+                y_base_left = self.__bases[1] 
+                x_base_right =self.__bases[6]
+                y_base_right = self.__bases[7]
+                w_left, h_left = self.__bases[2], self.__bases[3]
+                w_right, h_right = self.__bases[4], self.__bases[5]
+            else:
+                x_base_right = self.__bases[0]
+                y_base_right = self.__bases[1]
+                x_base_left = self.__bases[4]
+                y_base_left = self.__bases[5]
+                w_right, h_right = self.__bases[2], self.__bases[3]
+                w_left, h_left = self.__bases[6], self.__bases[7]
 
             
         if self.__state != "stuck" and time.time() - self.__stuck_timer > 5.  and self.__wait_lock:
@@ -175,7 +194,6 @@ class Main(Node):
             self.__done = False
             self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
 
-        x_filet = 640.
         msg_state = String()
         msg_state.data = self.__state
         self.trigger_pub.publish(self.__trigger)
@@ -204,68 +222,46 @@ class Main(Node):
         
         if self.__state == "come_back":
             self.__trigger.data = True
-            if len(self.__bases) == 8:
-                if self.__bases[0] < x_filet:
-                    x_base_left = self.__bases[0]
-                    y_base_left = self.__bases[1] 
-                    x_base_right =self.__bases[6]
-                    y_base_right = self.__bases[7]
-                    w_left, h_left = self.__bases[2], self.__bases[3]
-                    w_right, h_right = self.__bases[4], self.__bases[5]
-                else:
-                    x_base_right = self.__bases[0]
-                    y_base_right = self.__bases[1]
-                    x_base_left = self.__bases[4]
-                    y_base_left = self.__bases[5]
-                    w_right, h_right = self.__bases[2], self.__bases[3]
-                    w_left, h_left = self.__bases[6], self.__bases[7]
 
-                if self.x < x_filet:
-                    # left
-                    # self.get_logger().info("Going Left : " + str(x_base_left < self.x <  w_left) + ", " + str(y_base_left < self.y <  h_left))
-                    mid_x, mid_y = (x_base_left + w_left)/2, (y_base_left + h_left)//2
-                    angle = math.atan2(self.y - mid_y, self.x - mid_x)
-                    self.turn(angle)
-                    # time.sleep(0.1)
-                    self.move_no_balls(mid_x, mid_y)
-                    if x_base_left < self.x <  w_left and y_base_left < self.y <  h_left:
-                        self.__home = True
+            if self.x < x_filet:
+                # left
+                # self.get_logger().info("Going Left : " + str(x_base_left < self.x <  w_left) + ", " + str(y_base_left < self.y <  h_left))
+                mid_x, mid_y = (x_base_left + w_left)/2, (y_base_left + h_left)//2
+                angle = math.atan2(self.y - mid_y, self.x - mid_x)
+                self.turn(angle)
+                self.move_no_balls(mid_x, mid_y)
+                if x_base_left < self.x <  w_left and y_base_left < self.y <  h_left:
+                    self.__home = True
 
-                else:
-                    # right
-                    # self.get_logger().info("Going Right " + str(x_base_right < self.x < w_right and y_base_right < self.y < h_right))
-                    mid_x, mid_y = (x_base_right + w_right)/2, (y_base_right + h_right)//2
-                    angle = math.atan2(self.y - mid_y, self.x - mid_x)
-                    self.turn(angle)
-                    # time.sleep(0.1)MainBallCatcher
-                    self.move_no_balls(mid_x, mid_y)
-                    if x_base_right < self.x < w_right and y_base_right < self.y < h_right:
-                        self.__home = True
+            else:
+                # right
+                # self.get_logger().info("Going Right " + str(x_base_right < self.x < w_right and y_base_right < self.y < h_right))
+                mid_x, mid_y = (x_base_right + w_right)/2, (y_base_right + h_right)//2
+                angle = math.atan2(self.y - mid_y, self.x - mid_x)
+                self.turn(angle)
+                self.move_no_balls(mid_x, mid_y)
+                if x_base_right < self.x < w_right and y_base_right < self.y < h_right:
+                    self.__home = True
 
 
         if self.__state == "home":
             self.__trigger.data = False
             self.__cmd_twist.linear.x = -3.0
-            # time.sleep(1.5)
-            # self.__cmd_twist.linear.x = 0.0
-            # time.sleep(0.5)
-            # self.__cmd_twist.angular.z = -1.
-            # time.sleep(1.5)
-            # self.__cmd_twist.angular.z = 0.0
-            if len(self.__bases) == 8:
-                for i in range(0, len(self.__bases), 4):
-                    x, y, w, h = self.__bases[i], self.__bases[i+1],self.__bases[i+2], self.__bases[i+3]
-                    # if self.x < x_filet:
-                    if x < self.x <  w and y< self.y < h:
-                        self.__done = True
-                        self.get_logger().info(self.get_name() + " is inside the base !")
-                    else :
-                        self.__done = False
-                    # else:
-                    #     if w < self.x <  x and h < self.y < y:
-                    #         self.__done = False
-                    #     else :
-                    #         self.__done = True
+            
+            if self.x < x_filet:
+                if x_base_left < self.x <  w_left and y_base_left < self.y <  h_left:
+                    self.__done = False
+                    self.get_logger().info(self.get_name() + " is inside the base !")
+                else :
+                    self.__done = True
+
+            else:
+                if x_base_right < self.x < w_right and y_base_right < self.y < h_right:
+                    self.__done = False
+                    self.get_logger().info(self.get_name() + " is inside the base !")
+                else :
+                    self.__done = True
+
 
 
         if self.__state == "stuck":
