@@ -26,7 +26,7 @@ def main(args=None):
     rclpy.init()
     my_py_node = Main()
     rclpy.spin(my_py_node)
-    myPyNode.destroy_node()
+    my_py_node.destroy_node()
     rclpy.shutdown()
 
 
