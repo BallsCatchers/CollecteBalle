@@ -265,7 +265,7 @@
   <xacro:arm prefix="arm_l" x_reflect="-1" y_reflect="1" orientation="1"/>
   <xacro:arm prefix="arm_r" x_reflect="-1" y_reflect="-1" orientation="-1"/>
 
-  <gazebo reference="arm_l_link">
+  <!-- <gazebo reference="arm_l_link">
       <material>Gazebo/Gray</material>
       <dampingFactor>0.0002</dampingFactor>
       <collision>
@@ -321,7 +321,7 @@
       <mu2>100.0</mu2>
       <kp>500000</kp>
       <minDepth>0.001</minDepth>
-  </gazebo>
+  </gazebo> -->
 
   <!-- Rounded Shapes -->
   <!-- <xacro:macro name="cylinders" params ="prefix radius length parent y_orientation z_orientation x_pos y_pos z_pos">
