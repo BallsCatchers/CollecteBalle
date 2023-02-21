@@ -72,6 +72,8 @@ Rémi POREE
 
 Simon GERVAISE
 
+Augustin MORGES
+
 ### Gestion de projet
 
 [Taiga](https://tree.taiga.io/project/thomastacheron-collecteballe/timeline)
