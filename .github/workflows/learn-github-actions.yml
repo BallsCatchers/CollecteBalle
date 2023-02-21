@@ -3,7 +3,11 @@ run-name: ${{ github.actor }} is learning GitHub Actions
 on: [push]
 jobs:
   check-bats-version:
+<<<<<<< HEAD
     runs-on: ubuntu-20.04
+=======
+    runs-on: ubuntu-latest
+>>>>>>> first github action
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
