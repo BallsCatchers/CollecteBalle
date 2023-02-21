@@ -223,14 +223,14 @@ class Camera(Node):
                     cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
                 else: #C'est pas du même côté
                     if hauteur/2 - yg > 0: #En haut à gauche
-                        if hauteur*0.1 - position_y > 0: #Très en haut à gauche
+                        if hauteur*0.13 - position_y > 0: #Très en haut à gauche
                             goal = (int(doors_up_right[0]), int(doors_up_right[1]))
                             cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
                         else:
                             goal = (int(doors_up_left[0]), int(doors_up_left[1]))
                             cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
                     else: #En bas à gauche
-                        if hauteur*0.9 - position_y > 0: #Très en bas à gauche
+                        if hauteur*0.87 - position_y > 0: #Très en bas à gauche
                             goal = (int(doors_down_left[0]), int(doors_down_left[1]))
                             cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
                         else:
@@ -243,14 +243,14 @@ class Camera(Node):
                     cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
                 else: #Pas du même côté
                     if hauteur/2 - yg > 0: #En haut à droite
-                        if hauteur*0.1 - position_y > 0: #Très en haut à droite
+                        if hauteur*0.13 - position_y > 0: #Très en haut à droite
                             goal = (int(doors_up_left[0]), int(doors_up_left[1]))
                             cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
                         else:
                             goal = (int(doors_up_right[0]), int(doors_up_right[1]))
                             cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
                     else:
-                        if hauteur*0.9 - position_y > 0: #Très en bas à gauche
+                        if hauteur*0.87 - position_y > 0: #Très en bas à gauche
                             goal = (int(doors_down_right[0]), int(doors_down_right[1]))
                             cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
                         else:
