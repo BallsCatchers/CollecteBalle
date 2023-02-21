@@ -65,13 +65,17 @@
     <xacro:box_inertia m="5" w="${base_width}" d="${base_length}" h="${base_height}"/>
   </link>
 
+  <gazebo reference="base_link">
+    <material>FireMaterial</material>
+  </gazebo>
+
   <link name="base_top_link_red">
     <visual>
       <geometry>
         <box size="${(base_length-0.04)/2} ${base_width-0.04} 0.02"/>
       </geometry>
-      <material name="Red">
-        <color rgba="0 0.9 0.9 1"/>
+      <material name="Blue">
+        <color rgba="0.9 0.9 0 1"/>
       </material>
     </visual>
 
@@ -91,7 +95,7 @@
   </joint>
 
   <gazebo reference="base_top_link_red">
-    <material>Gazebo/Red</material>
+    <material>Gazebo/Blue</material>
   </gazebo>
 
   <link name="base_top_link_green">
