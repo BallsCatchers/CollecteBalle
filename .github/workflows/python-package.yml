@@ -24,6 +24,11 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Set up ROS
+      uses: ros-tooling/setup-ros@0.5.0
+      with:
+        required-ros-distributions: foxy
+      
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
