@@ -1,3 +1,4 @@
+[![tennis-court-foxy](https://github.com/BallsCatchers/CollecteBalle/actions/workflows/tennis_court-foxy.yaml/badge.svg)](https://github.com/BallsCatchers/CollecteBalle/actions/workflows/tennis_court-foxy.yaml)
 # BallsCatchers AGATE
 ## (A)utonomous (G)atherer for (A)dvanced (T)ennis (E)xercise
 
