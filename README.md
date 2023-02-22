@@ -30,6 +30,10 @@ colcon build --packages-select gazebo_ros2_control
 ```
 And re-run.
 
+```
+pip install pygame
+```
+
 ## Launch simulation
 ### Launch AGATE only
 
