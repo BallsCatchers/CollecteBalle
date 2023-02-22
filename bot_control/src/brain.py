@@ -10,6 +10,9 @@ from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import Bool
 from std_msgs.msg import String
 from geometry_msgs.msg import Vector3
+from rclpy.qos import DurabilityPolicy, QoSProfile, HistoryPolicy, ReliabilityPolicy
+
+from tennis_court.msg import BallManagerStats, GameStatus
 
 import math
 
@@ -20,19 +23,31 @@ class Main(Node):
     def __init__(self):
         super().__init__("MainBallCatcher")
 
+        qos_profile = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST, depth=1,
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            durability=DurabilityPolicy.TRANSIENT_LOCAL
+        )
+
         # ===============================
         # Subscriptions 
         # ===============================
-        self.input_goal = self.create_subscription(Vector3, "/ball_goal", self.sub_goal, 10)
+        self.input_goal_sub = self.create_subscription(Vector3, "/ball_goal", self.sub_goal, 10)
         self.__goal = []
         self.__is_ball = True
 
-        self.bases_sub = self.create_subscription(Float64MultiArray, "/bases", self.sub_bases, 10)
-        self.__bases = []
-
         self.gotball_pub = self.create_publisher(String, "/gotball", 10)
 
-        self.__pose = self.create_subscription(Vector3, "/bot_pos", self.get_pose, 10)
+        self.__bases_sub = self.create_subscription(Float64MultiArray, "/bases", self.sub_bases, 10)
+        self.__bases = []
+
+        self.__safe_bases_sub = self.create_subscription(Float64MultiArray, "/safe_bases", self.sub_safe_bases, 10)
+        self.__safe_bases = []
+
+        self.__game_status_sub = self.create_subscription(BallManagerStats, "/ball_manager_stats", self.sub_game_status, qos_profile=qos_profile)
+        self.game_status = 0
+
+        self.__pose_sub = self.create_subscription(Vector3, "/bot_pos", self.get_pose, 10)
         self.__last_pose = []
         # ===============================
         # Publishers
@@ -93,7 +108,18 @@ class Main(Node):
             self.__bases = msg.data
         # self.get_logger().info("Going home : " + str(len(self.__bases)) + ", first element : " + str(self.__bases[0]))
 
+    def sub_safe_bases(self, msg):
+        # self.get_logger().info(self.get_name() + " got bases")
 
+        # Getting the bases values only if we detecte 2 rectangles
+        if len(msg.data) == 8:
+            self.__safe_bases = msg.data
+        # self.get_logger().info("Going home : " + str(len(self.__safe_bases)) + ", first element : " + str(self.__safe_bases[0]))
+
+    def sub_game_status(self, msg):
+        # self.get_logger().info(self.get_name() + " got status")
+        self.game_status = msg.game_status
+        # self.get_logger().info(self.get_name() + " msg : " + str(self.game_status))
 
     def sub_goal(self, msg):
         # Getting the goal information
@@ -175,6 +201,7 @@ class Main(Node):
 
         chrono = time.time() - self.__chrono # For a timing switch of states
         x_filet = 640. # middle of the img, (can be setup auto if needed)
+        y_filet = 360.
 
         stuck = self.check_stuck()
 
@@ -192,16 +219,33 @@ class Main(Node):
                 y_base_left = self.__bases[1] 
                 x_base_right =self.__bases[6]
                 y_base_right = self.__bases[7]
-                w_left, h_left = self.__bases[2], self.__bases[3]
-                w_right, h_right = self.__bases[4], self.__bases[5]
+                w_left_base, h_left_base = self.__bases[2], self.__bases[3]
+                w_right_base, h_right_base = self.__bases[4], self.__bases[5]
             else:
                 x_base_right = self.__bases[0]
                 y_base_right = self.__bases[1]
                 x_base_left = self.__bases[4]
                 y_base_left = self.__bases[5]
-                w_right, h_right = self.__bases[2], self.__bases[3]
-                w_left, h_left = self.__bases[6], self.__bases[7]
+                w_right_base, h_right_base = self.__bases[2], self.__bases[3]
+                w_left_base, h_left_base = self.__bases[6], self.__bases[7]
 
+        # getting the param of the safe bases
+        # self.get_logger().info(self.get_name() + " safe base bonders : " + str(self.__safe_bases))
+        if len(self.__safe_bases) == 8:
+            if self.__safe_bases[0] > y_filet:
+                x_safe_base_down = self.__safe_bases[0]
+                y_safe_base_down = self.__safe_bases[1] 
+                x_safe_base_up =self.__safe_bases[6]
+                y_safe_base_up = self.__safe_bases[7]
+                w_down_safe_base, h_down_safe_base = self.__safe_bases[2], self.__safe_bases[3]
+                w_up_safe_base, h_up_safe_base = self.__safe_bases[4], self.__safe_bases[5]
+            else:
+                x_safe_base_up = self.__safe_bases[0]
+                y_safe_base_up = self.__safe_bases[1]
+                x_safe_base_down = self.__safe_bases[4]
+                y_safe_base_down = self.__safe_bases[5]
+                w_up_safe_base, h_up_safe_base = self.__safe_bases[2], self.__safe_bases[3]
+                w_down_safe_base, h_down_safe_base = self.__safe_bases[6], self.__safe_bases[7]
 
         # ===========================
         # State changing functions
@@ -217,9 +261,18 @@ class Main(Node):
             self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
 
 
-        # getting the balls function, timer controled 
-        # if chrono >= 60.*2 and self.__state == "get_balls":
-        if self.__nb_balls >= 4 and self.__state == "get_balls":
+        # getting the balls function, timer controled
+        # self.get_logger().info(self.get_name() + " state game : " + str(self.game_status))
+        if (self.game_status==0) and (len(self.__safe_bases) == 8) and (self.__state != "go_safe"):
+                self.__last_state = self.__state
+                self.__state = "go_safe"
+                self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
+
+        elif self.game_status==2 and self.__state != "get_balls":
+            self.__state = "get_balls"
+            self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
+
+        elif self.__nb_balls >= 4 and self.__state == "get_balls":
             self.__last_state = self.__state
             self.__state = "come_back"
             self.__nb_balls = 0
@@ -284,23 +337,46 @@ class Main(Node):
 
             if self.x < x_filet:
                 # left
-                # self.get_logger().info("Going Left : " + str(x_base_left < self.x <  w_left) + ", " + str(y_base_left < self.y <  h_left))
-                mid_x, mid_y = (x_base_left + w_left)/2, (y_base_left + h_left)//2
+                # self.get_logger().info("Going Left : " + str(x_base_left < self.x <  w_left_base) + ", " + str(y_base_left < self.y <  h_left_base))
+                mid_x, mid_y = (x_base_left + w_left_base)/2, (y_base_left + h_left_base)//2
                 angle = math.atan2(self.y - mid_y, self.x - mid_x)
                 self.turn(angle)
                 self.move_no_balls(mid_x, mid_y)
-                if x_base_left < self.x <  w_left and y_base_left < self.y <  h_left:
+                if x_base_left < self.x <  w_left_base and y_base_left < self.y <  h_left_base:
                     self.__home = True
 
             else:
                 # right
-                # self.get_logger().info("Going Right " + str(x_base_right < self.x < w_right and y_base_right < self.y < h_right))
-                mid_x, mid_y = (x_base_right + w_right)/2, (y_base_right + h_right)//2
+                # self.get_logger().info("Going Right " + str(x_base_right < self.x < w_right_base and y_base_right < self.y < h_right_base))
+                mid_x, mid_y = (x_base_right + w_right_base)/2, (y_base_right + h_right_base)//2
                 angle = math.atan2(self.y - mid_y, self.x - mid_x)
                 self.turn(angle)
                 self.move_no_balls(mid_x, mid_y)
-                if x_base_right < self.x < w_right and y_base_right < self.y < h_right:
+                if x_base_right < self.x < w_right_base and y_base_right < self.y < h_right_base:
                     self.__home = True
+
+        if self.__state == "go_safe":
+            self.__trigger.data = True
+
+            if self.y < y_filet:
+                # left
+                # self.get_logger().info("Going Left : " + str(x_base_left < self.x <  w_left_base) + ", " + str(y_base_left < self.y <  h_left_base))
+                mid_x, mid_y = (x_safe_base_down + w_down_safe_base)/2, (y_safe_base_down + h_down_safe_base)//2
+                angle = math.atan2(self.y - mid_y, self.x - mid_x)
+                self.turn(angle)
+                self.move_no_balls(mid_x, mid_y)
+                # if x_safe_base_left < self.x <  w_left_safe_base and y_safe_base_left < self.y <  h_left_safe_base:
+                #     self.__home = True
+
+            else:
+                # right
+                # self.get_logger().info("Going Right " + str(x_base_right < self.x < w_right_base and y_base_right < self.y < h_right_base))
+                mid_x, mid_y = (x_safe_base_up + w_up_safe_base)/2, (y_safe_base_up + h_up_safe_base)//2
+                angle = math.atan2(self.y - mid_y, self.x - mid_x)
+                self.turn(angle)
+                self.move_no_balls(mid_x, mid_y)
+                # if x_safe_base_right < self.x < w_right_safe_base and y_safe_base_right < self.y < h_right_safe_base:
+                #     self.__home = True
 
 
         if self.__state == "home":
@@ -308,14 +384,14 @@ class Main(Node):
             self.__cmd_twist.linear.x = -3.0
 
             if self.x < x_filet:
-                if x_base_left < self.x <  w_left and y_base_left < self.y <  h_left:
+                if x_base_left < self.x <  w_left_base and y_base_left < self.y <  h_left_base:
                     self.__done = False
                     # self.get_logger().info(self.get_name() + " is inside the left base !")
                 else :
                     self.__done = True
 
             else:
-                if x_base_right < self.x < w_right and y_base_right < self.y < h_right:
+                if x_base_right < self.x < w_right_base and y_base_right < self.y < h_right_base:
                     self.__done = False
                     # self.get_logger().info(self.get_name() + " is inside the right base !")
                 else :

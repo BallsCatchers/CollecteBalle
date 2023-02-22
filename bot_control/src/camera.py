@@ -21,7 +21,7 @@ def detect_yellow_balls(image):
     # Convert the image to HSV
     im_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     # Define the range of yellow color in HSV
-    lower_yellow = np.array([22, 93, 0])
+    lower_yellow = np.array([22, 0, 0])
     upper_yellow = np.array([55, 255, 255])
     r = 5
     # Create a mask for the yellow pixels
@@ -51,8 +51,8 @@ def detect_yellow_balls(image):
 
 def detect_base(img_RGB):
     ## Params
-    lower_orange = np.array([10, 200, 130])
-    upper_orange = np.array([40, 230, 150])
+    lower_orange = np.array([10, 200, 0])
+    upper_orange = np.array([40, 230, 255])
 
     ## detection
     #rgb to hsv
@@ -75,6 +75,35 @@ def detect_base(img_RGB):
         return True, base
     else:
         return False, None
+    
+def detect_safe_base(img_RGB):
+    ## Params
+    lower_green = np.array([50, 50, 0])
+    upper_green = np.array([90, 255, 255])
+
+    ## detection
+    #rgb to hsv
+    im_hsv = cv2.cvtColor(img_RGB, cv2.COLOR_BGR2HSV)
+    #mask with lower/upper values
+    mask = cv2.inRange(im_hsv, lower_green, upper_green)
+
+    ## green base detection (1/2)
+    # get contours in mask image
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    base = []
+    for c in contours:
+        x,y,w,h = cv2.boundingRect(c)
+        air = w*h
+        # Append the rectangle's information to the list
+        if w > 15: # Avoid unwanted detection
+            if air > 3000:
+                base.append((x, y, w, h))
+
+    if base:
+        return True, base
+    else:
+        return False, None
 
 def detect_marker(img_RGB):
     r = 5
@@ -83,12 +112,12 @@ def detect_marker(img_RGB):
 
     # Define the range of colors for red and green markers
     # Create a mask for the red and green pixels
-    lower_red = np.array([0, 215, 120])
-    upper_red = np.array([25, 255, 150])
+    lower_red = np.array([0, 18, 255])
+    upper_red = np.array([7, 255, 255])
     red_mask = cv2.inRange(im_hsv, lower_red, upper_red)
 
-    lower_green = np.array([50, 190, 120])
-    upper_green = np.array([90, 255, 160])
+    lower_green = np.array([140, 0, 0])
+    upper_green = np.array([170, 255, 255])
     green_mask = cv2.inRange(im_hsv, lower_green, upper_green)
 
     # Apply morphological operations to remove noise
@@ -120,9 +149,9 @@ def detect_marker(img_RGB):
         position_y = (green_y + red_y)/2
         orientation = math.atan2(green_y - red_y, green_x - red_x)
         # orientation = (- orientation + math.pi) % (2 * math.pi)
-        return True, position_x, position_y, orientation
+        return True, position_x, position_y, orientation, red_x, red_y, green_x, green_y
 
-    return False, None, None, None
+    return False, None, None, None, None, None, None, None
 
 def detect_net(img_RGB):
 
@@ -156,6 +185,7 @@ class Camera(Node):
         self.subscription_image = self.create_subscription(Image, "/zenith_camera/image_raw", self.image_callback, 10)
         self.publisher_balls = self.create_publisher(Float64MultiArray, '/tennis_balls', 10)
         self.publisher_base = self.create_publisher(Float64MultiArray, '/bases', 10)
+        self.safe_publisher_base = self.create_publisher(Float64MultiArray, '/safe_bases', 10)
         self.publisher_robot = self.create_publisher(Vector3, '/bot_pos', 10)
         self.publisher_goal = self.create_publisher(Vector3, '/ball_goal', 10)
 
@@ -283,10 +313,11 @@ class Camera(Node):
     def process(self):
         if self.input_received:
             balls = detect_yellow_balls(self.image)
-            marker_detected, position_x, position_y, orientation = detect_marker(self.image)
+            marker_detected, position_x, position_y, orientation, red_x, red_y, green_x, green_y = detect_marker(self.image)
             base_detected, base = detect_base(self.image)
+            safe_base_detected, safe_base = detect_safe_base(self.image)
 
-            ball_positions, base_positions, robot_position = [], [], []
+            ball_positions, base_positions, safe_base_positions, robot_position = [], [], [], []
 
             if base_detected:
                 for x, y, w, h in base:
@@ -297,6 +328,16 @@ class Camera(Node):
                     base_positions.append(y * 1.0)
                     base_positions.append(x * 1.0 + w)
                     base_positions.append(y * 1.0 + h)
+
+            if safe_base_detected:
+                for x, y, w, h in safe_base:
+                    # self.get_logger().info(f"\nsafe_Base detected at: (x,y) = ({x},{y}) with size (w,h) = ({w},{h})\n")
+                    cv2.rectangle(self.image,(int(x),int(y)),(int(x)+int(w),int(y)+int(h)),(0,255,0),2)
+                     # Add the x and y coordinates of each ball to the ball_positions list
+                    safe_base_positions.append(x * 1.0)
+                    safe_base_positions.append(y * 1.0)
+                    safe_base_positions.append(x * 1.0 + w)
+                    safe_base_positions.append(y * 1.0 + h)
 
             # Reset the update state of each balls
             for i in self.balls:
@@ -360,17 +401,19 @@ class Camera(Node):
                 # self.get_logger().info(f"\Robot detected at: (x,y, theta) = ({position_x},{position_y},{orientation*180./math.pi}")
                 robot_position = [position_x, position_y, orientation]
                 cv2.rectangle(self.image,(int(position_x)-2,int(position_y)-2),(int(position_x)+2,int(position_y)+2),(255,0,0),2)
+                # cv2.rectangle(self.image,(int(red_x)-2,int(red_y)-2),(int(red_x)+2,int(red_y)+2),(255,0,100),2)
+                # cv2.rectangle(self.image,(int(green_x)-2,int(green_y)-2),(int(green_x)+2,int(green_y)+2),(100,0,255),2)
 
                 goal = self.go_to_target(robot_position)
 
-                self.image_publisher(ball_positions, base_positions, robot_position, goal)
+                self.image_publisher(ball_positions, base_positions, safe_base_positions, robot_position, goal)
 
             cv2.imshow("Image window", self.image)
             cv2.waitKey(1)  # it will prevent the window from freezing
             self.input_received = False
 
 
-    def image_publisher(self, ball_positions, base_positions, robot_position, goal):
+    def image_publisher(self, ball_positions, base_positions, safe_base_positions, robot_position, goal):
         if ball_positions != []:
             # Create the Float64MultiArray message for the balls
             msg_balls = Float64MultiArray()
@@ -397,6 +440,13 @@ class Camera(Node):
             msg_base.data = base_positions
             # Publish the message
             self.publisher_base.publish(msg_base)
+
+        if safe_base_positions != []:
+            # Create the Float64MultiArray message for the base
+            msg_safe_base = Float64MultiArray()
+            msg_safe_base.data = safe_base_positions
+            # Publish the message
+            self.safe_publisher_base.publish(msg_safe_base)
 
         if robot_position != []:
             msg_orientation = Vector3()
