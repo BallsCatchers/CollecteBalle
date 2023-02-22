@@ -29,6 +29,7 @@
 <xacro:property name="base_height" value="0.024"/>
 
 <xacro:property name="wall_height" value="0.18"/>
+<xacro:property name ="wall_length" value = "0.018" />
 <xacro:property name="wall_zoff" value="0.072"/>
 
 <!-- <xacro:property name="wheel_radius" value="0.096"/> -->
@@ -120,6 +121,39 @@
     <origin xyz="${-(base_width+base_height)/2} 0.0 ${-wall_zoff}" rpy="0 0 ${pi/2}"/>
     <axis xyz="0 1 0"/>
   </joint>
+
+<xacro:macro name="wall" params="prefix y_reflect offset">
+    <link name="${prefix}_link">
+      <visual>
+        <geometry>
+          <box size="${base_length} ${wall_length} ${wall_height}"/>
+        </geometry>
+        <material name="Red">
+          <color rgba="0 0.9 0.9 1"/>
+        </material>
+      </visual>
+
+      <collision>
+        <geometry>
+          <box size="${base_length} ${wall_length} ${wall_height}"/>
+        </geometry>
+      </collision>
+
+      <xacro:box_inertia m="5" w="${base_length}" d="${wall_length}" h="${wall_height}"/>
+    </link>
+
+    <joint name="${prefix}_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${prefix}_link"/>
+      <origin xyz="0.0 ${-y_reflect*(base_length)/2+y_reflect*wall_length*1.5 + offset} ${-wall_zoff}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:wall prefix="wall_r" y_reflect="1" offset = "0"/>
+  <xacro:wall prefix="wall_l" y_reflect="-1" offset="0"/>
+  <xacro:wall prefix="wall_r_inside" y_reflect="1" offset = "${wheel_width*1.5}"/>
+  <xacro:wall prefix="wall_l_inside" y_reflect="-1" offset="${-wheel_width*1.5}"/>  
 
   <xacro:macro name="flame_base" params ="prefix radius offset">
     <link name="${prefix}_link">
@@ -294,37 +328,6 @@
     <kp>500000</kp>
     <minDepth>0.001</minDepth>
   </gazebo>
-
-  <xacro:macro name="wall" params="prefix y_reflect">
-    <link name="${prefix}_link">
-      <visual>
-        <geometry>
-          <box size="${base_length} ${base_height} ${wall_height}"/>
-        </geometry>
-        <material name="Red">
-          <color rgba="0 0.9 0.9 1"/>
-        </material>
-      </visual>
-
-      <collision>
-        <geometry>
-          <box size="${base_length} ${base_height} ${wall_height}"/>
-        </geometry>
-      </collision>
-
-      <xacro:box_inertia m="5" w="${base_length}" d="${base_height}" h="${wall_height}"/>
-    </link>
-
-    <joint name="${prefix}_joint" type="fixed">
-      <parent link="base_link"/>
-      <child link="${prefix}_link"/>
-      <origin xyz="0.0 ${-y_reflect*(base_length)/2+y_reflect*base_height*1.5} ${-wall_zoff}" rpy="0 0 0"/>
-      <axis xyz="0 1 0"/>
-    </joint>
-  </xacro:macro>
-
-  <xacro:wall prefix="wall_r" y_reflect="1" />
-  <xacro:wall prefix="wall_l" y_reflect="-1" />
 
   <link name="base_top_link_red">
     <visual>
