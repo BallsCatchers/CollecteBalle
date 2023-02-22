@@ -219,46 +219,47 @@ class Camera(Node):
 
             if largeur/2 - position_x > 0: #Le robot est à gauche
                 if largeur/2 - xg > 0: #La target est aussi à gauche
-                    goal = (int(xg), int(yg))
-                    cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                    goal = (int(xg), int(yg), 1)
+                    cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal[:2], (255, 0, 0), 2)
                 else: #C'est pas du même côté
                     if hauteur/2 - yg > 0: #En haut à gauche
                         if hauteur*0.13 - position_y > 0: #Très en haut à gauche
-                            goal = (int(doors_up_right[0]), int(doors_up_right[1]))
-                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                            goal = (int(doors_up_right[0]), int(doors_up_right[1]), 0)
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal[:2], (255, 0, 0), 2)
                         else:
-                            goal = (int(doors_up_left[0]), int(doors_up_left[1]))
-                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                            goal = (int(doors_up_left[0]), int(doors_up_left[1]), 0)
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal[:2], (255, 0, 0), 2)
                     else: #En bas à gauche
                         if hauteur*0.87 - position_y > 0: #Très en bas à gauche
-                            goal = (int(doors_down_left[0]), int(doors_down_left[1]))
-                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                            goal = (int(doors_down_left[0]), int(doors_down_left[1]), 0)
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal[:2], (255, 0, 0), 2)
                         else:
-                            goal = (int(doors_down_right[0]), int(doors_down_right[1]))
-                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                            goal = (int(doors_down_right[0]), int(doors_down_right[1]), 0)
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal[:2], (255, 0, 0), 2)
 
             else: #Le robot est à droite
                 if largeur/2 - xg <= 0: #La target est aussi à droite
-                    goal = (int(xg), int(yg))
-                    cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                    goal = (int(xg), int(yg), 1)
+                    cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal[:2], (255, 0, 0), 2)
                 else: #Pas du même côté
                     if hauteur/2 - yg > 0: #En haut à droite
                         if hauteur*0.13 - position_y > 0: #Très en haut à droite
-                            goal = (int(doors_up_left[0]), int(doors_up_left[1]))
-                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                            goal = (int(doors_up_left[0]), int(doors_up_left[1]), 0)
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal[:2], (255, 0, 0), 2)
                         else:
-                            goal = (int(doors_up_right[0]), int(doors_up_right[1]))
-                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                            goal = (int(doors_up_right[0]), int(doors_up_right[1]), 0)
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal[:2], (255, 0, 0), 2)
                     else:
                         if hauteur*0.87 - position_y > 0: #Très en bas à gauche
-                            goal = (int(doors_down_right[0]), int(doors_down_right[1]))
-                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                            goal = (int(doors_down_right[0]), int(doors_down_right[1]), 0)
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal[:2], (255, 0, 0), 2)
                         else:
-                            goal = (int(doors_down_left[0]), int(doors_down_left[1]))
-                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal, (255, 0, 0), 2)
+                            goal = (int(doors_down_left[0]), int(doors_down_left[1]), 0)
+                            cv2.arrowedLine(self.image, (int(position_x), int(position_y)), goal[:2], (255, 0, 0), 2)
 
             return(goal)
-        return []
+        goal = (0, 0, 2)
+        return(goal)
 
 
     def process(self):
@@ -278,17 +279,6 @@ class Camera(Node):
                     base_positions.append(y * 1.0)
                     base_positions.append(x * 1.0 + w)
                     base_positions.append(y * 1.0 + h)
-
-            # dx, dy = [], []
-            # for i in range(0, len(base_positions), 4):
-            #     self.get_logger().info("Base loop step :" + str(i))
-            #     dx = base_positions[i]
-
-            # self.get_logger().info("\n=========================\n")
-            # self.get_logger().info("Found " + str(len(balls)) + " balls in img")
-
-            # self.balls = n_balls * [detection_time t0, pos_x, pos_y, updated (bool)]
-
 
             # Reset the update state of each balls
             for i in self.balls:
@@ -380,6 +370,7 @@ class Camera(Node):
                 goal_ball = Vector3()
                 goal_ball.x = float(goal[0])
                 goal_ball.y = float(goal[1])
+                goal_ball.z = float(goal[2])
                 self.publisher_goal.publish(goal_ball)
 
         if base_positions != []:
