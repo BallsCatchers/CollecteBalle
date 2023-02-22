@@ -30,6 +30,8 @@ class Main(Node):
         self.__bases = self.create_subscription(Float64MultiArray, "/bases", self.sub_bases, 10)
         self.__bases = []
 
+        self.gotball_pub = self.create_publisher(String, "/gotball", 10)
+
         self.__pose = self.create_subscription(Vector3, "/bot_pos", self.get_pose, 10)
         self.__last_pose = []
         # ===============================
@@ -259,10 +261,19 @@ class Main(Node):
                     self.__t_last_detect = time.time()
                     # self.get_logger().info(self.get_name() + " bot close to goal : " + str(d))
 
+                msg_gotball = String()
+                msg_gotball.data = "NOTGOTBALL"
+                self.gotball_pub.publish(msg_gotball)
+                
                 if self.__t_last_detect != None :
                     if (time.time() - self.__t_last_detect) > 1.7 and not(self.__catched_ball): 
                         self.__nb_balls += 1
                         self.__catched_ball = True
+
+                        msg_gotball = String()
+                        msg_gotball.data = "GOTBALL"
+                        self.gotball_pub.publish(msg_gotball)
+
                         self.get_logger().info(self.get_name() + " got 1 ball !")
                         self.get_logger().info(self.get_name() + " Nb of collected balls : " + str(self.__nb_balls))
                 self.move(x_target, y_target)
