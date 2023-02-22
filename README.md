@@ -1,3 +1,4 @@
+![tennis-court-foxy](https://github.com/BallsCatchers/CollecteBalle/actions/workflows/tennis_court-foxy.yaml/badge.svg)
 # BallsCatchers AGATE
 ## (A)utonomous (G)atherer for (A)dvanced (T)ennis (E)xercise
 
@@ -29,6 +30,10 @@ colcon build --packages-select gazebo_ros2_control
 . install/setup.bash
 ```
 And re-run.
+
+```
+pip install pygame
+```
 
 ## Launch simulation
 ### Launch AGATE only
