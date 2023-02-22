@@ -268,7 +268,7 @@ class Main(Node):
                 self.__state = "go_safe"
                 self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
 
-        elif self.game_status==2 and self.__state != "get_balls":
+        elif self.game_status==2 and self.__state == "go_safe":
             self.__state = "get_balls"
             self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
 
