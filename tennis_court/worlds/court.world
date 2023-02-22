@@ -22,12 +22,12 @@
             <uri>model://zenith_camera</uri>
         </include>
 
-        <model name="player_1_collision">
+        <!-- <model name="player_1_collision">
             <include>
                 <uri>model://person_standing</uri>
                 <pose>0 0 0 0 0 3.14159</pose>
             </include>
-        </model>
+        </model> -->
         <actor name="player_1">
             <link name="player_link"/>
             <script>
@@ -70,12 +70,12 @@
             </plugin>
         </actor>
 
-        <model name="player_2_collision">
+        <!-- <model name="player_2_collision">
             <include>
                 <uri>model://person_standing</uri>
                 <pose>0 0 0 0 0 0</pose>
             </include>
-        </model>
+        </model> -->
         <actor name="player_2">
             <link name="player_link"/>
             <script>
