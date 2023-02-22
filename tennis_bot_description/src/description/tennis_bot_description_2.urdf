@@ -2,7 +2,7 @@
 <robot name="tennis_bot" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Define robot constants -->
-  <xacro:property name="base_width" value="0.36"/>
+  <!-- <xacro:property name="base_width" value="0.36"/>
   <xacro:property name="base_length" value="0.40"/>
   <xacro:property name="base_height" value="0.02"/>
 
@@ -20,7 +20,33 @@
   <xacro:property name="arm_height" value="0.02"/>
   <xacro:property name="arm_ygap" value="-0.01"/>
   <xacro:property name="arm_zoff" value="0.10"/>
-  <xacro:property name="arm_xoff" value="-0.21"/>
+  <xacro:property name="arm_xoff" value="-0.21"/> -->
+
+<!-- Same robot but 20% larger than the previous one -->
+
+<xacro:property name="base_width" value="0.432"/>
+<xacro:property name="base_length" value="0.5"/>
+<xacro:property name="base_height" value="0.024"/>
+
+<xacro:property name="wall_height" value="0.18"/>
+<xacro:property name ="wall_length" value = "0.018" />
+<xacro:property name="wall_zoff" value="0.072"/>
+
+<!-- <xacro:property name="wheel_radius" value="0.096"/> -->
+<xacro:property name="wheel_radius" value="0.06"/>
+<xacro:property name="wheel_width" value="0.04"/>
+<!-- <xacro:property name="wheel_ygap" value="0.03"/> -->
+<xacro:property name="wheel_ygap" value="-0.025"/>
+<xacro:property name="wheel_zoff" value="0.12"/>
+<xacro:property name="wheel_xoff" value="0.134"/>
+
+<xacro:property name="arm_width" value="0.144"/>
+<!-- <xacro:property name="arm_length" value="0.24"/> -->
+<xacro:property name="arm_length" value="0.2"/>
+<xacro:property name="arm_height" value="0.024"/>
+<xacro:property name="arm_ygap" value="-0.012"/>
+<xacro:property name="arm_zoff" value="0.12"/>
+<xacro:property name="arm_xoff" value="-0.252"/>
 
   <!-- <xacro:export_env name="WHEEL_DIAMETER" value="${2*wheel_radius}"/> -->
 
@@ -58,14 +84,14 @@
         <color rgba="0 0.9 0.9 1"/>
       </material>
     </visual>
-    
+
     <collision>
       <geometry>
         <box size="${base_length} ${base_width} ${base_height}"/>
       </geometry>
     </collision>
 
-    <xacro:box_inertia m="5" w="${base_width}" d="${base_length}" h="${base_height}"/>
+    <xacro:box_inertia m="7" w="${base_width}" d="${base_length}" h="${base_height}"/>
   </link>
 
 <!-- Walls -->
@@ -79,7 +105,7 @@
         <color rgba="0 0.9 0.9 1"/>
       </material>
     </visual>
-    
+
     <collision>
       <geometry>
         <box size="${base_width} ${base_height} ${wall_height}"/>
@@ -95,6 +121,39 @@
     <origin xyz="${-(base_width+base_height)/2} 0.0 ${-wall_zoff}" rpy="0 0 ${pi/2}"/>
     <axis xyz="0 1 0"/>
   </joint>
+
+<xacro:macro name="wall" params="prefix y_reflect offset">
+    <link name="${prefix}_link">
+      <visual>
+        <geometry>
+          <box size="${base_length} ${wall_length} ${wall_height}"/>
+        </geometry>
+        <material name="Red">
+          <color rgba="0 0.9 0.9 1"/>
+        </material>
+      </visual>
+
+      <collision>
+        <geometry>
+          <box size="${base_length} ${wall_length} ${wall_height}"/>
+        </geometry>
+      </collision>
+
+      <xacro:box_inertia m="5" w="${base_length}" d="${wall_length}" h="${wall_height}"/>
+    </link>
+
+    <joint name="${prefix}_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${prefix}_link"/>
+      <origin xyz="0.0 ${-y_reflect*(base_length)/2+y_reflect*wall_length*1.5 + offset} ${-wall_zoff}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:wall prefix="wall_r" y_reflect="1" offset = "0"/>
+  <xacro:wall prefix="wall_l" y_reflect="-1" offset="0"/>
+  <xacro:wall prefix="wall_r_inside" y_reflect="1" offset = "${wheel_width*1.6}"/>
+  <xacro:wall prefix="wall_l_inside" y_reflect="-1" offset="${-wheel_width*1.6}"/>  
 
   <xacro:macro name="flame_base" params ="prefix radius offset">
     <link name="${prefix}_link">
@@ -270,37 +329,6 @@
     <minDepth>0.001</minDepth>
   </gazebo>
 
-  <xacro:macro name="wall" params="prefix y_reflect">
-    <link name="${prefix}_link">
-      <visual>
-        <geometry>
-          <box size="${base_length} ${base_height} ${wall_height}"/>
-        </geometry>
-        <material name="Red">
-          <color rgba="0 0.9 0.9 1"/>
-        </material>
-      </visual>
-      
-      <collision>
-        <geometry>
-          <box size="${base_length} ${base_height} ${wall_height}"/>
-        </geometry>
-      </collision>
-
-      <xacro:box_inertia m="5" w="${base_length}" d="${base_height}" h="${wall_height}"/>
-    </link>
-
-    <joint name="${prefix}_joint" type="fixed">
-      <parent link="base_link"/>
-      <child link="${prefix}_link"/>
-      <origin xyz="0.0 ${-y_reflect*(base_length)/2+y_reflect*base_height*1.5} ${-wall_zoff}" rpy="0 0 0"/>
-      <axis xyz="0 1 0"/>
-    </joint>
-  </xacro:macro>
-
-  <xacro:wall prefix="wall_r" y_reflect="1" />
-  <xacro:wall prefix="wall_l" y_reflect="-1" />
-
   <link name="base_top_link_red">
     <visual>
       <geometry>
@@ -356,7 +384,7 @@
   </joint>
 
   <gazebo reference="base_top_link_green">
-    <material>Gazebo/Indigo </material>
+    <material>Gazebo/Indigo</material>
   </gazebo>
 
   <!-- Robot Footprint -->
@@ -367,7 +395,7 @@
     <child link="base_footprint"/>
     <origin xyz="0.0 0.0 ${-(wheel_radius+wheel_zoff)}" rpy="0 0 0"/>
   </joint>
-  	
+
   <!-- Wheels -->
   <xacro:macro name="wheel" params="prefix x_reflect y_reflect">
     <link name="${prefix}_link">
@@ -404,7 +432,7 @@
   <xacro:wheel prefix="drivewhl_b_r" x_reflect="-1" y_reflect="-1" />
   <xacro:wheel prefix="drivewhl_f_l" x_reflect="1" y_reflect="1" />
   <xacro:wheel prefix="drivewhl_f_r" x_reflect="1" y_reflect="-1" />
-  
+
   <!--Robot arms -->
   <xacro:macro name="arm" params="prefix x_reflect y_reflect orientation">
     <link name="${prefix}_link">
@@ -417,17 +445,17 @@
           <color rgba="0.9 0.9 0.9 1"/>
         </material>
       </visual>
-      
+
       <collision>
         <origin xyz="0.10 0 0.02" rpy="${pi/2} 0 0"/>
         <geometry>
             <box size="${arm_length} ${arm_width} ${arm_height}"/>
         </geometry>
       </collision>
-      
+
       <xacro:box_inertia m="1" w="${arm_width}" d="${arm_length}" h="${arm_height}"/>
     </link>
-    
+
     <joint name="${prefix}_joint" type="continuous">
       <parent link="base_link"/>
       <child link="${prefix}_link"/>
@@ -435,7 +463,7 @@
       <axis xyz="0 0 1"/>
     </joint>
   </xacro:macro>
-  
+
   <xacro:arm prefix="arm_l" x_reflect="-1" y_reflect="1" orientation="1"/>
   <xacro:arm prefix="arm_r" x_reflect="-1" y_reflect="-1" orientation="-1"/>
 
@@ -508,7 +536,7 @@
           <color rgba="0.9 0.9 0.9 1"/>
         </material>
       </visual>
-      
+
       <collision>
         <geometry>
           <cylinder radius="${radius}" length="${length}"/>
@@ -518,12 +546,12 @@
       <xacro:cylinder_inertia m="0.2" r="${radius}" h="${length}"/>
 
     </link>
-  
+
     <joint name="${prefix}_joint" type="fixed">
       <parent link="${parent}_link"/>
       <child link="${prefix}_link"/>
       <origin xyz="${x_pos} ${y_pos} ${z_pos}" rpy="0 ${y_orientation} ${z_orientation}"/>
-    </joint>  
+    </joint>
   </xacro:macro>
 
   <xacro:cylinders prefix="cylinder_1" radius="${arm_height/2}" length="${arm_width}" parent="arm_l" y_orientation="0" z_orientation="0" x_pos="0.2" y_pos="0" z_pos="0.02"/>
@@ -543,7 +571,7 @@
           <color rgba="0.9 0.9 0.9 1"/>
         </material>
       </visual>
-      
+
       <collision>
         <geometry>
           <sphere radius="${radius}"/>
@@ -553,12 +581,12 @@
       <xacro:sphere_inertia m="0.05" r="${radius}"/>
 
     </link>
-  
+
     <joint name="${prefix}_joint" type="fixed">
       <parent link="${parent}_link"/>
       <child link="${prefix}_link"/>
       <origin xyz="${x_pos} ${y_pos} ${z_pos}" rpy="0 0 0"/>
-    </joint>  
+    </joint>
   </xacro:macro>
 
   <xacro:spheres prefix="sphere_l_f" radius="0.02" parent="base" x_pos="${(base_length-0.04)/2}" y_pos="${(base_width-0.04)/2}" z_pos="0.07" />
