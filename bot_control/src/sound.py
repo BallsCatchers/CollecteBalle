@@ -39,7 +39,7 @@ class Main(Node):
 
     def sub_gotball(self, msg):
         # Getting the goal information
-        self.get_logger().info(self.get_name() + " Yoshi !" + msg.data)
+        # self.get_logger().info(self.get_name() + " Yoshi !" + msg.data)
         if msg.data == "GOTBALL":
             if not self.get_ball:
                 self.get_ball = True
