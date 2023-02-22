@@ -75,6 +75,35 @@ def detect_base(img_RGB):
         return True, base
     else:
         return False, None
+    
+def detect_safe_base(img_RGB):
+    ## Params
+    lower_green = np.array([50, 50, 0])
+    upper_green = np.array([90, 255, 255])
+
+    ## detection
+    #rgb to hsv
+    im_hsv = cv2.cvtColor(img_RGB, cv2.COLOR_BGR2HSV)
+    #mask with lower/upper values
+    mask = cv2.inRange(im_hsv, lower_green, upper_green)
+
+    ## green base detection (1/2)
+    # get contours in mask image
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    base = []
+    for c in contours:
+        x,y,w,h = cv2.boundingRect(c)
+        air = w*h
+        # Append the rectangle's information to the list
+        if w > 15: # Avoid unwanted detection
+            if air > 3000:
+                base.append((x, y, w, h))
+
+    if base:
+        return True, base
+    else:
+        return False, None
 
 def detect_marker(img_RGB):
     r = 5
@@ -360,6 +389,8 @@ class Camera(Node):
                 # self.get_logger().info(f"\Robot detected at: (x,y, theta) = ({position_x},{position_y},{orientation*180./math.pi}")
                 robot_position = [position_x, position_y, orientation]
                 cv2.rectangle(self.image,(int(position_x)-2,int(position_y)-2),(int(position_x)+2,int(position_y)+2),(255,0,0),2)
+                # cv2.rectangle(self.image,(int(red_x)-2,int(red_y)-2),(int(red_x)+2,int(red_y)+2),(255,0,100),2)
+                # cv2.rectangle(self.image,(int(green_x)-2,int(green_y)-2),(int(green_x)+2,int(green_y)+2),(100,0,255),2)
 
                 goal = self.go_to_target(robot_position)
 

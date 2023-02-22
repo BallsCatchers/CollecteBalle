@@ -384,7 +384,7 @@
   </joint>
 
   <gazebo reference="base_top_link_green">
-    <material>Gazebo/Green</material>
+    <material>Gazebo/Indigo</material>
   </gazebo>
 
   <!-- Robot Footprint -->
