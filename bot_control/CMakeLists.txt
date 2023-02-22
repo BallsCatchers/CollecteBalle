@@ -70,6 +70,7 @@ install(PROGRAMS
   src/control_test.py
   src/arm_control.py
   src/joy_to_gazebo.py
+  src/sound.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
