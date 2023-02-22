@@ -11,8 +11,7 @@
 
   <xacro:property name="wheel_radius" value="0.08"/>
   <xacro:property name="wheel_width" value="0.04"/>
-  <!-- <xacro:property name="wheel_ygap" value="0.025"/> -->
-  <xacro:property name="wheel_ygap" value="-0.025"/>
+  <xacro:property name="wheel_ygap" value="0.025"/>
   <xacro:property name="wheel_zoff" value="0.1"/>
   <xacro:property name="wheel_xoff" value="0.12"/>
 
@@ -59,7 +58,7 @@
         <color rgba="0 0.9 0.9 1"/>
       </material>
     </visual>
-
+    
     <collision>
       <geometry>
         <box size="${base_length} ${base_width} ${base_height}"/>
@@ -80,7 +79,7 @@
         <color rgba="0 0.9 0.9 1"/>
       </material>
     </visual>
-
+    
     <collision>
       <geometry>
         <box size="${base_width} ${base_height} ${wall_height}"/>
@@ -281,7 +280,7 @@
           <color rgba="0 0.9 0.9 1"/>
         </material>
       </visual>
-
+      
       <collision>
         <geometry>
           <box size="${base_length} ${base_height} ${wall_height}"/>
@@ -368,7 +367,7 @@
     <child link="base_footprint"/>
     <origin xyz="0.0 0.0 ${-(wheel_radius+wheel_zoff)}" rpy="0 0 0"/>
   </joint>
-
+  	
   <!-- Wheels -->
   <xacro:macro name="wheel" params="prefix x_reflect y_reflect">
     <link name="${prefix}_link">
@@ -405,7 +404,7 @@
   <xacro:wheel prefix="drivewhl_b_r" x_reflect="-1" y_reflect="-1" />
   <xacro:wheel prefix="drivewhl_f_l" x_reflect="1" y_reflect="1" />
   <xacro:wheel prefix="drivewhl_f_r" x_reflect="1" y_reflect="-1" />
-
+  
   <!--Robot arms -->
   <xacro:macro name="arm" params="prefix x_reflect y_reflect orientation">
     <link name="${prefix}_link">
@@ -418,17 +417,17 @@
           <color rgba="0.9 0.9 0.9 1"/>
         </material>
       </visual>
-
+      
       <collision>
         <origin xyz="0.10 0 0.02" rpy="${pi/2} 0 0"/>
         <geometry>
             <box size="${arm_length} ${arm_width} ${arm_height}"/>
         </geometry>
       </collision>
-
+      
       <xacro:box_inertia m="1" w="${arm_width}" d="${arm_length}" h="${arm_height}"/>
     </link>
-
+    
     <joint name="${prefix}_joint" type="continuous">
       <parent link="base_link"/>
       <child link="${prefix}_link"/>
@@ -436,11 +435,11 @@
       <axis xyz="0 0 1"/>
     </joint>
   </xacro:macro>
-
+  
   <xacro:arm prefix="arm_l" x_reflect="-1" y_reflect="1" orientation="1"/>
   <xacro:arm prefix="arm_r" x_reflect="-1" y_reflect="-1" orientation="-1"/>
 
-  <!-- <gazebo reference="arm_l_link">
+  <gazebo reference="arm_l_link">
       <material>Gazebo/Gray</material>
       <dampingFactor>0.0002</dampingFactor>
       <collision>
@@ -496,7 +495,7 @@
       <mu2>100.0</mu2>
       <kp>500000</kp>
       <minDepth>0.001</minDepth>
-  </gazebo> -->
+  </gazebo>
 
   <!-- Rounded Shapes -->
   <!-- <xacro:macro name="cylinders" params ="prefix radius length parent y_orientation z_orientation x_pos y_pos z_pos">
@@ -509,7 +508,7 @@
           <color rgba="0.9 0.9 0.9 1"/>
         </material>
       </visual>
-
+      
       <collision>
         <geometry>
           <cylinder radius="${radius}" length="${length}"/>
@@ -519,12 +518,12 @@
       <xacro:cylinder_inertia m="0.2" r="${radius}" h="${length}"/>
 
     </link>
-
+  
     <joint name="${prefix}_joint" type="fixed">
       <parent link="${parent}_link"/>
       <child link="${prefix}_link"/>
       <origin xyz="${x_pos} ${y_pos} ${z_pos}" rpy="0 ${y_orientation} ${z_orientation}"/>
-    </joint>
+    </joint>  
   </xacro:macro>
 
   <xacro:cylinders prefix="cylinder_1" radius="${arm_height/2}" length="${arm_width}" parent="arm_l" y_orientation="0" z_orientation="0" x_pos="0.2" y_pos="0" z_pos="0.02"/>
@@ -544,7 +543,7 @@
           <color rgba="0.9 0.9 0.9 1"/>
         </material>
       </visual>
-
+      
       <collision>
         <geometry>
           <sphere radius="${radius}"/>
@@ -554,12 +553,12 @@
       <xacro:sphere_inertia m="0.05" r="${radius}"/>
 
     </link>
-
+  
     <joint name="${prefix}_joint" type="fixed">
       <parent link="${parent}_link"/>
       <child link="${prefix}_link"/>
       <origin xyz="${x_pos} ${y_pos} ${z_pos}" rpy="0 0 0"/>
-    </joint>
+    </joint>  
   </xacro:macro>
 
   <xacro:spheres prefix="sphere_l_f" radius="0.02" parent="base" x_pos="${(base_length-0.04)/2}" y_pos="${(base_width-0.04)/2}" z_pos="0.07" />
