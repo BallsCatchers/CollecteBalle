@@ -34,7 +34,7 @@ Pourcentage de tâches réalisées: 100 %
 ## Nouvelles mesures
 
 ### Continuer
-- Githib action
+- Github action
 - Réfléchir une vrai stratégie pour maximiser les points
 - Dijtra
 - Power point
