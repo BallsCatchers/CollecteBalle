@@ -384,12 +384,12 @@ class Camera(Node):
             # goal_ball.y = oldest_ball[2]
             # self.publisher_goal.publish(goal_ball)
 
-            if goal != []:
-                goal_ball = Vector3()
-                goal_ball.x = float(goal[0])
-                goal_ball.y = float(goal[1])
-                goal_ball.z = float(goal[2])
-                self.publisher_goal.publish(goal_ball)
+        if goal != []:
+            goal_ball = Vector3()
+            goal_ball.x = float(goal[0])
+            goal_ball.y = float(goal[1])
+            goal_ball.z = float(goal[2])
+            self.publisher_goal.publish(goal_ball)
 
         if base_positions != []:
             # Create the Float64MultiArray message for the base
