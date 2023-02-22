@@ -18,6 +18,7 @@ import os
 def sawtooth(theta):
     return 2 * math.atan(math.tan(theta / 2))
 
+
 class Main(Node):
     def __init__(self):
         super().__init__("MainBallCatcher")
@@ -31,36 +32,41 @@ class Main(Node):
         # Initialize Pygame mixer
         pygame.mixer.init()
 
+        # Load and play mario.mp3 on loop
+        mario_mp3_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../../bot_control/src/", "mario.mp3")
+        pygame.mixer.music.load(mario_mp3_path)
+        pygame.mixer.music.play(-1)
+
     def sub_gotball(self, msg):
         # Getting the goal information
         self.get_logger().info(self.get_name() + " Yoshi !" + msg.data)
         if msg.data == "GOTBALL":
             if not self.get_ball:
                 self.get_ball = True
-                self.process_music("aoe.mp3")
+                self.process_music("aoe.mp3", volume=1.0)
         else:
             if self.get_ball:
                 self.get_ball = False
-                self.process_music("mario.mp3")
+                # Resume playing mario.mp3 on loop
+                pygame.mixer.music.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../../bot_control/src/", "mario.mp3"))
+                pygame.mixer.music.play(-1)
 
-    def process_music(self, music_file):
+    def process_music(self, music_file, volume):
         # Construct the path to the music file
         mp3_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../../bot_control/src/", music_file)
+
+        # Set the volume
+        pygame.mixer.music.set_volume(volume)
 
         # Load and play the music file
         pygame.mixer.music.load(mp3_path)
         pygame.mixer.music.play()
 
-        # Stop the other music file if it is playing
-        if music_file == "aoe.mp3":
-            other_music_file = "mario.mp3"
-        else:
-            other_music_file = "aoe.mp3"
-        other_mp3_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../../bot_control/src/", other_music_file)
-        if pygame.mixer.music.get_busy():
-            pygame.mixer.music.stop()
-            pygame.mixer.music.load(other_mp3_path)
-            pygame.mixer.music.play()
+        # Wait for the duration of the music and then resume playing mario.mp3 on loop
+        pygame.time.wait(int(pygame.mixer.Sound(mp3_path).get_length() * 1000))
+        pygame.mixer.music.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../../bot_control/src/", "mario.mp3"))
+        pygame.mixer.music.play(-1)
+
 
 def main(args=None):
     print(folder_path,"\n","\n")
