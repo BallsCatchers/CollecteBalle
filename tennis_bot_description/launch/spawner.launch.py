@@ -73,7 +73,7 @@ def generate_launch_description():
     spawn_entity = launch_ros.actions.Node( # fait spawn le robot
     	package='gazebo_ros',
     	executable='spawn_entity.py',
-        arguments=['-entity', 'tennis_bot', '-x', '0', '-y', '6', '-z', '1', '-topic', 'robot_description'], # nom du robot
+        arguments=['-entity', 'tennis_bot', '-x', '0', '-y', '6', '-z', '0.3', '-topic', 'robot_description'], # nom du robot
         output='screen'
     )
 
@@ -103,6 +103,16 @@ def generate_launch_description():
         output="screen",
         emulate_tty=True,
         **{executable: "camera.py"}
+    )
+
+    # sound node
+    sound_node = launch_ros.actions.Node(
+        package="bot_control",
+        condition=launch.conditions.IfCondition(LaunchConfiguration("control")),
+        parameters=[{"use_sim_time": True}],
+        output="screen",
+        emulate_tty=True,
+        **{executable: "sound.py"}
     )
 
 
@@ -144,6 +154,7 @@ def generate_launch_description():
         spawn_entity,
         control_node,
         arm_control,
-        camera_node
+        camera_node,
+        sound_node
         # rviz_node
     ])

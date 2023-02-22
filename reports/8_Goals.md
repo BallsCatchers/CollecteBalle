@@ -32,6 +32,6 @@ PO: Rémi Porée
 
 ## Challenges techniques
 
-- utilisier Dijdtra
+- utilisier Dijkstra
 - Mettre en place des github action
 

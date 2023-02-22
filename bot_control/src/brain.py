@@ -42,6 +42,8 @@ class Main(Node):
         self.__safe_bases_sub = self.create_subscription(Float64MultiArray, "/safe_bases", self.sub_safe_bases, 10)
         self.__safe_bases = []
 
+        self.gotball_pub = self.create_publisher(String, "/gotball", 10)
+
         self.__game_status_sub = self.create_subscription(BallManagerStats, "/ball_manager_stats", self.sub_game_status, qos_profile=qos_profile)
         self.game_status = 0
 
@@ -90,8 +92,8 @@ class Main(Node):
         self.theta = 0.
 
         # Proportional coefs for movements 
-        self.K1 = 0.00004 # Go front
-        self.K2 = 2.6 # Rotation
+        self.K1 = 0.01 # Go front
+        self.K2 = 3.5 # Rotation
 
         # Ros Node spinning
         timer_period = 0.1  # seconds
@@ -144,12 +146,12 @@ class Main(Node):
     def move(self, dx, dy):
         err_x = (dx - self.x)
         err_y = (dy - self.y)
-        d = err_x ** 2 + err_y ** 2
+        d = np.sqrt(err_x ** 2 + err_y ** 2)
         # Calculating new speed, reducing it while turning and adding min/max thresholds
         v_x = float(max(min(self.K1 * d - 0.6*abs(self.__cmd_twist.angular.z), 2.), 0.7))
 
         # Closing the doors if too fast
-        if v_x > 0.7 or not(self.__is_ball):
+        if d > 70 or d < 20 or not(self.__is_ball):
             self.__trigger.data = True
         else:
             self.__trigger.data = False
@@ -177,7 +179,7 @@ class Main(Node):
     def turn(self, dtheta):
         err_theta = sawtooth(self.theta - dtheta)
         cmd_angle = self.K2 * err_theta
-        if err_theta > 0.4 or not(self.__is_ball):
+        if err_theta > 0.35 or not(self.__is_ball):
             self.__trigger.data = True
 
         self.__cmd_twist.angular.z = cmd_angle
@@ -270,9 +272,10 @@ class Main(Node):
             self.__state = "get_balls"
             self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
 
-        elif chrono >= 60.*2 and self.__state == "get_balls":
+        elif self.__nb_balls >= 4 and self.__state == "get_balls":
             self.__last_state = self.__state
             self.__state = "come_back"
+            self.__nb_balls = 0
             self.get_logger().info(self.get_name() + " switched state to : " + self.__state)
 
         # Going back to the base
@@ -306,15 +309,24 @@ class Main(Node):
                 # print("Angle : ", angle*180./np.pi)
                 # print("Bot : ", self.theta*180./np.pi)
                 d = np.sqrt((x_target - self.x)**2 + (y_target - self.y)**2)
-                if d < 13 :
+                if d < 16 :
                     self.__catched_ball = False
                     self.__t_last_detect = time.time()
-                    self.get_logger().info(self.get_name() + " bot close to goal : " + str(d))
+                    # self.get_logger().info(self.get_name() + " bot close to goal : " + str(d))
+
+                msg_gotball = String()
+                msg_gotball.data = "NOTGOTBALL"
+                self.gotball_pub.publish(msg_gotball)
 
                 if self.__t_last_detect != None :
-                    if time.time() - self.__t_last_detect > 1.5 and not(self.__catched_ball): 
+                    if (time.time() - self.__t_last_detect) > 1.7 and not(self.__catched_ball): 
                         self.__nb_balls += 1
                         self.__catched_ball = True
+
+                        msg_gotball = String()
+                        msg_gotball.data = "GOTBALL"
+                        self.gotball_pub.publish(msg_gotball)
+
                         self.get_logger().info(self.get_name() + " got 1 ball !")
                         self.get_logger().info(self.get_name() + " Nb of collected balls : " + str(self.__nb_balls))
                 self.move(x_target, y_target)
