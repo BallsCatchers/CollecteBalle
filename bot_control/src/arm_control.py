@@ -64,7 +64,8 @@ class PublisherJointTrajectory(Node):
     	# self.get_logger().info('Received trigger ! ' + str(msg.data))
     	self.__trig.data = msg.data
     	if self.__trig.data:
-    		self.goals = [-2., 2.]  # Closed state
+    		# self.goals = [-2., 2.]  # Closed state
+    		self.goals = [-2.5, 2.5]  # Closed state
     	else:
     		self.goals = [0., -0.]  # Open state
     	# self.get_logger().info('Send goals : ' + str(self.goals[0]) + ', ' + str(self.goals[1]))
