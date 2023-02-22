@@ -18,4 +18,4 @@ jobs:
       - uses: ros-tooling/action-ros-ci@0.2.7
         with:
           target-ros2-distro: foxy
-          package-name: tennis_court
+          package-name: bot_control
