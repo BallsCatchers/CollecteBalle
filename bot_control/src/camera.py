@@ -13,6 +13,10 @@ from cv_bridge import CvBridge, CvBridgeError
 bridge = CvBridge()
 import time
 
+
+def dist(self, x, y, x_target, y_target):
+        return np.sqrt((x_target - x) ** 2 + (y_target - y) ** 2)
+
 def detect_yellow_balls(image):
     # Convert the image to HSV
     im_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -184,6 +188,19 @@ class Camera(Node):
             self.get_logger().info(self.get_name() + " CvBridgeError !! Cannot convert img from ros msg to CV2 !")
             pass
 
+
+    def choose_target(self, x, y ):
+        nb_balls = len(self.balls)
+        c = 0
+        distances = []
+        while c < nb_balls:
+            distances.append(self.dist(x, y, self.balls[c]))
+            c += 1
+        # print(f"Target : {self.balls[2 * np.argmin(distances)]} {self.balls[2 * np.argmin(distances) + 1]}")
+        return np.argmin(distances)
+
+
+
     def go_to_target(self, robot_position):
         # self.get_logger().info(f"\Robot detected at: (x,y, theta) = ({position_x},{position_y},{orientation*180./math.pi}")
         position_x, position_y, orientation = [i for i in robot_position]
@@ -214,7 +231,8 @@ class Camera(Node):
         cv2.putText(self.image, "doors_down_left", (int(doors_down_left[0]), int(doors_down_left[1])), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
         if len(self.balls) > 0:
-            xg, yg = self.balls[0][1], self.balls[0][2]
+            index = self.choose_target(position_x, position_y)
+            xg, yg = self.balls[index][1], self.balls[index][2]
             hauteur = (y_min + y_max); largeur = (x_min + x_max)
 
             if largeur/2 - position_x > 0: #Le robot est à gauche
