@@ -27,7 +27,7 @@ class Main(Node):
         self.__goal = []
         self.__is_ball = True
 
-        self.__bases = self.create_subscription(Float64MultiArray, "/bases", self.sub_bases, 10)
+        self.bases_sub = self.create_subscription(Float64MultiArray, "/bases", self.sub_bases, 10)
         self.__bases = []
 
         self.gotball_pub = self.create_publisher(String, "/gotball", 10)
@@ -264,7 +264,7 @@ class Main(Node):
                 msg_gotball = String()
                 msg_gotball.data = "NOTGOTBALL"
                 self.gotball_pub.publish(msg_gotball)
-                
+
                 if self.__t_last_detect != None :
                     if (time.time() - self.__t_last_detect) > 1.7 and not(self.__catched_ball): 
                         self.__nb_balls += 1
